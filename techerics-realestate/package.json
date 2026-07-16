@@ -19,7 +19,7 @@
     "tailwindcss": "^4.0.0",
     "three": "^0.169.0",
     "react-photo-sphere-viewer": "^6.2.0",
-    "next-auth": "^5.0.0",
+    "next-auth": "beta",
     "bcryptjs": "^2.4.3",
     "@vercel/analytics": "^1.4.1",
     "@vercel/speed-insights": "^1.1.0",
