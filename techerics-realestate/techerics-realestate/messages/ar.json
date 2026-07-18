@@ -1,0 +1,35 @@
+{
+  "nav": {
+    "buy": "شراء",
+    "rent": "إيجار",
+    "newProjects": "مشاريع جديدة",
+    "commercial": "تجاري",
+    "login": "تسجيل الدخول",
+    "postProperty": "أضف عقارك"
+  },
+  "home": {
+    "heroTitle": "اعثر على منزلك القادم دون أي تعقيد",
+    "heroSubtitle": "قوائم موثقة، جولات افتراضية 360°، وتواصل فوري عبر واتساب — في كل مدينة رئيسية.",
+    "exploreCities": "استكشف حسب المدينة",
+    "featured": "عقارات مميزة"
+  },
+  "search": {
+    "placeholder": "ابحث عن مدينة أو حي أو مشروع...",
+    "button": "بحث",
+    "resultsFound": "تم العثور على {count} عقار"
+  },
+  "property": {
+    "enquireNow": "مهتم؟ استفسر الآن",
+    "yourName": "اسمك",
+    "phoneNumber": "رقم الهاتف",
+    "sendEnquiry": "إرسال الاستفسار",
+    "thanksMessage": "شكراً! سنتواصل معك قريباً عبر واتساب / الهاتف."
+  },
+  "footer": {
+    "popularCities": "المدن الشائعة",
+    "popularLocalities": "الأحياء الشائعة",
+    "byBudget": "حسب الميزانية",
+    "propertyType": "نوع العقار",
+    "company": "الشركة"
+  }
+}
