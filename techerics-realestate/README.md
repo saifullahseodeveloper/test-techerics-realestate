@@ -295,3 +295,17 @@ Isi ke saath v4 ke 2 known migration gotchas bhi fix kiye:
 
 Agar dobara koi dependency conflict error aaye Vercel build logs mein,
 wahi error message copy-paste kar dena — turant fix kar dunga.
+
+## Fix — Prisma 7 "datasource.url property is required" build error
+
+Prisma 7 (jo Vercel pe automatically latest install ho raha hai) ne
+database URL rakhne ka tarika badal diya — sirf `schema.prisma` mein
+`url = env("DATABASE_URL")` likhna ab kaafi nahi hai `migrate deploy`
+command ke liye. Fix: naya `prisma.config.ts` file add ki (root mein,
+`package.json` ke bagal mein) jisme explicitly `datasource.url` set
+kiya hai. `dotenv` package bhi add kiya (is config file ko local `.env`
+padhne ke liye chahiye).
+
+Vercel pe koi extra env variable add nahi karna — `DATABASE_URL` jo
+already Environment Variables mein daala hai, wahi is naye config file
+se automatically read ho jaayega.
