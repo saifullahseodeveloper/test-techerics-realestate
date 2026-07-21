@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GLOBAL_COUNTRIES, GLOBAL_CITIES, CountryData, CityData } from "@/lib/global-locations";
 import { useCountry } from "@/lib/country-context";
+import { getCountryMarket } from "@/lib/country-data";
 
 type Props = {
   selectedCity?: string;
@@ -29,9 +30,10 @@ export default function GlobalLocationSelector({ selectedCity, onSelect }: Props
 
   const handleCountryClick = (c: CountryData) => {
     setCountryCode(c.code);
-    if (c.defaultLocale === "ar") {
+    const m = getCountryMarket(c.code);
+    if (m.defaultLocale === "ar") {
       router.push(`/ar`);
-    } else if (c.defaultLocale === "hi") {
+    } else if (m.defaultLocale === "hi") {
       router.push(`/hi`);
     } else {
       router.push(`/en`);
