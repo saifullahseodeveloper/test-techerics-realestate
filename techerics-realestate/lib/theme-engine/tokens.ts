@@ -1,29 +1,69 @@
 // ============================================================
-// GLOBAL REAL ESTATE TEMPLATE INTELLIGENCE ENGINE — TAXONOMY
-// Synthesizes design patterns from Bayut, Zillow, PropertyFinder,
-// Rightmove, Compass, Redfin, MagicBricks, and Idealista.
+// STRUCTURAL LAYOUT ENGINE — COMPONENT & SECTION SCHEMAS
+// Defines distinct component layout variants, section orders, and navigation patterns.
 // ============================================================
 
-export type TemplateCategory =
-  | "LUXURY_ESTATE"
-  | "MINIMAL_COMPASS"
-  | "ENTERPRISE_BAYUT"
-  | "EDITORIAL_MAGAZINE"
-  | "GLASSMORPHISM_DARK"
+export type HeroVariant =
+  | "GLASS_AURORA"
+  | "APPLE_MINIMAL_LIGHT"
+  | "DUBAI_VIDEO_LUXURY"
+  | "LINEAR_GRID_TECH"
   | "MAP_FIRST_ZILLOW"
-  | "COMMERCIAL_PORTAL"
-  | "ECO_SUSTAINABLE";
+  | "NEO_BRUTALIST"
+  | "EDITORIAL_MAGAZINE";
+
+export type CardVariant =
+  | "GLASS_3D_HOVER"
+  | "APPLE_PRODUCT_SLAB"
+  | "DUBAI_GOLD_CARD"
+  | "LINEAR_MONOCHROME_CARD"
+  | "NEO_BRUTAL_BOX";
+
+export type SearchVariant =
+  | "AI_CONVERSATIONAL"
+  | "MAP_INTERACTIVE"
+  | "CLEAN_SEARCH_BAR"
+  | "COMPACT_OVERLAY";
+
+export type SectionType =
+  | "HERO"
+  | "CITIES"
+  | "FEATURED_PROJECTS"
+  | "PREMIUM_PROPERTIES"
+  | "VIDEO_REELS"
+  | "WHY_US"
+  | "DEVELOPER_PARTNERS"
+  | "MARKET_INSIGHTS"
+  | "TESTIMONIALS"
+  | "AWARDS"
+  | "CONSULTATION_BANNER";
+
+export type LayoutSchema = {
+  heroVariant: HeroVariant;
+  cardVariant: CardVariant;
+  searchVariant: SearchVariant;
+  sectionOrder: SectionType[];
+};
+
+export type ThemeCategory =
+  | "GLASSMORPHISM_DARK"
+  | "APPLE_MINIMAL_LIGHT"
+  | "DUBAI_GOLD_LUXURY"
+  | "LINEAR_CYBER_DARK"
+  | "MAP_FIRST_ZILLOW"
+  | "NEO_BRUTALISM_BOLD"
+  | "EDITORIAL_MAGAZINE";
 
 export type MarketPattern = {
   region: string;
-  sourceInspiration: string; // e.g. "Bayut & PropertyFinder UX"
+  sourceInspiration: string;
   keyPatterns: string[];
 };
 
 export type DesignTokens = {
   id: string;
   name: string;
-  category: TemplateCategory;
+  category: ThemeCategory;
   description: string;
   version: string;
   performanceScore: number;
@@ -33,6 +73,7 @@ export type DesignTokens = {
   badge: string;
   isFavorite?: boolean;
   marketPattern: MarketPattern;
+  layoutSchema: LayoutSchema;
   styles: {
     bg: string;
     text: string;
