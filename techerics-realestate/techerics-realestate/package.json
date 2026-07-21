@@ -36,6 +36,7 @@
     "@tailwindcss/postcss": "^4.0.0",
     "autoprefixer": "^10.4.20",
     "@types/react": "^19.0.0",
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "@types/bcryptjs": "^2.4.6"
   }
 }
