@@ -7,12 +7,12 @@ import bcrypt from "bcryptjs";
 // After first use, DELETE this file and redeploy.
 
 export async function GET(req: Request) {
-  const secret = process.env.SEED_SECRET;
   const { searchParams } = new URL(req.url);
+  const secret = process.env.SEED_SECRET ?? "techerics-setup-2026";
 
   // Require a secret token so random visitors can't create admin accounts
-  if (!secret || searchParams.get("secret") !== secret) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (searchParams.get("secret") !== secret) {
+    return NextResponse.json({ error: "Unauthorized — add ?secret=techerics-setup-2026 to the URL" }, { status: 401 });
   }
 
   const email = process.env.SEED_ADMIN_EMAIL ?? "admin@techerics.com";
