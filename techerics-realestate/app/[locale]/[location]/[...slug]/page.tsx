@@ -6,6 +6,7 @@ import PropertyCard from "@/components/PropertyCard";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 import EmiCalculator from "@/components/EmiCalculator";
 import MapEmbed from "@/components/MapEmbed";
+import DynamicSeoBlock from "@/components/DynamicSeoBlock";
 
 export const revalidate = 60;
 
@@ -232,6 +233,15 @@ export default async function DynamicLocationMatrixPage({ params }: Props) {
             ))}
           </div>
         </div>
+
+        {/* Phase 4 Dynamic Content Engine Block */}
+        <DynamicSeoBlock
+          locationName={subLocationSegment || locationSegment}
+          propertyType={propertyType || "Properties"}
+          purpose={purpose ? `for ${purpose === "SALE" ? "Sale" : "Rent"}` : "for Sale & Rent"}
+          listingCount={market.sampleProjects.length}
+          countryName={market.countryName}
+        />
       </div>
     </main>
   );

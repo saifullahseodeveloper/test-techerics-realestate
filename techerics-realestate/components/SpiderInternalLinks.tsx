@@ -90,7 +90,7 @@ export default function SpiderInternalLinks() {
               {market.topDevelopers.slice(0, 6).map((dev) => (
                 <li key={dev.slug}>
                   <Link
-                    href={`/${market.slug}/search?developer=${dev.slug}`}
+                    href={`/${market.slug}/developers/${dev.slug}`}
                     className="text-slate-400 hover:text-teal-300 transition"
                   >
                     {dev.name} ({dev.projectsCount})

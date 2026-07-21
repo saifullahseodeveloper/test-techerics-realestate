@@ -122,12 +122,58 @@ export default async function PropertyPage({ params }: Props) {
     ? dbProp.media.map((m) => ({ url: m.url, altText: m.altText || title }))
     : fallback?.media || [];
 
+  // RealEstateListing JSON-LD Schema
+  const jsonLdSchema = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateListing",
+    name: title,
+    description: desc,
+    url: `https://techerics.com/en/property/${slug}`,
+    offers: {
+      "@type": "Offer",
+      price: listingPrice,
+      priceCurrency: dbProp?.listings[0]?.currency || fallback?.currency || "INR",
+      availability: "https://schema.org/InStock",
+    },
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: localityName,
+      addressRegion: cityName,
+    },
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://techerics.com/en" },
+      { "@type": "ListItem", position: 2, name: cityName, item: `https://techerics.com/en/${cityName.toLowerCase().replace(/\s+/g, "-")}` },
+      { "@type": "ListItem", position: 3, name: localityName, item: `https://techerics.com/en/${cityName.toLowerCase().replace(/\s+/g, "-")}/${localityName.toLowerCase().replace(/\s+/g, "-")}` },
+      { "@type": "ListItem", position: 4, name: title, item: `https://techerics.com/en/property/${slug}` },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-8 text-slate-100">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
       <div className="mx-auto max-w-6xl">
-        {/* Breadcrumb Navigation */}
-        <nav aria-label="breadcrumb" className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
-          Home / Properties / {cityName} / {localityName} / <span className="text-teal-400">{title}</span>
+        {/* Clickable Breadcrumb Navigation */}
+        <nav aria-label="breadcrumb" className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 flex-wrap">
+          <Link href="/en" className="hover:text-teal-400 transition">Home</Link>
+          <span>/</span>
+          <Link href={`/en/${cityName.toLowerCase().replace(/\s+/g, "-")}`} className="hover:text-teal-400 transition">{cityName}</Link>
+          <span>/</span>
+          <Link href={`/en/${cityName.toLowerCase().replace(/\s+/g, "-")}/${localityName.toLowerCase().replace(/\s+/g, "-")}`} className="hover:text-teal-400 transition">{localityName}</Link>
+          <span>/</span>
+          <span className="text-teal-400">{title}</span>
         </nav>
 
         {/* Top Hero Split Section */}
