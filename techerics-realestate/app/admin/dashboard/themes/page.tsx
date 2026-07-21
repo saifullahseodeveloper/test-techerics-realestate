@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTheme } from "@/lib/theme-engine/theme-context";
-import { DesignTokens, TemplateCategory } from "@/lib/theme-engine/tokens";
+import { DesignTokens, ThemeCategory } from "@/lib/theme-engine/tokens";
 
 export default function GlobalTemplateIntelligenceEngine() {
   const { activeTheme, setThemeId, availableThemes, exportThemeJson, importThemeJson } = useTheme();
