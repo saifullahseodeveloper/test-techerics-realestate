@@ -41,13 +41,52 @@ function parseBedrooms(slugSegment: string): number | null {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, location, slug = [] } = await params;
-  const locationName = slug.length ? slug[slug.length - 1].replace(/-/g, " ").toUpperCase() : location.toUpperCase();
+
+  let propertyType: string | null = null;
+  let purpose: "SALE" | "RENT" | null = null;
+  let bedrooms: number | null = null;
+
+  for (const seg of slug) {
+    if (!propertyType) propertyType = parsePropertyType(seg);
+    if (!purpose) purpose = parsePurpose(seg);
+    if (!bedrooms) bedrooms = parseBedrooms(seg);
+  }
+
+  const currentPurpose = purpose || "SALE";
+  const locationName = slug.length ? slug[0].replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : location.toUpperCase();
+  const countryName = location.toUpperCase();
+  const typeText = propertyType || "Properties";
+  const bedText = bedrooms ? `${bedrooms} BHK ` : "";
+  const intentText = currentPurpose === "SALE" ? "for Sale" : "for Rent";
+
+  const title = `${bedText}${typeText} ${intentText} in ${locationName}, ${countryName} (2026 Prices) | Tech Erics`;
+  const description = `Browse verified ${bedText.toLowerCase()}${typeText.toLowerCase()} ${intentText} in ${locationName}, ${countryName}. RERA approved masterplans, 360° virtual tours, zero commission.`;
 
   return {
-    title: `${locationName} Real Estate & Properties | Tech Erics`,
-    description: `Browse verified luxury apartments, villas, and commercial properties in ${locationName}. Best prices & RERA verified listings.`,
+    title,
+    description,
     alternates: {
       canonical: `/${locale}/${location}/${slug.join("/")}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://techerics.com/${locale}/${location}/${slug.join("/")}`,
+      siteName: "Tech Erics Global Real Estate",
+      images: [
+        {
+          url: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=80",
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
     },
   };
 }

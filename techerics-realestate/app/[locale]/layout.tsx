@@ -8,6 +8,7 @@ import { routing } from "@/i18n/routing";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CodeProtection from "@/components/CodeProtection";
+import GlobalSchema from "@/components/GlobalSchema";
 import { CountryProvider } from "@/lib/country-context";
 import "../globals.css";
 
@@ -53,6 +54,7 @@ export default async function LocaleLayout({
         <div className="ambient-glow-1" />
         <div className="ambient-glow-2" />
         <CodeProtection />
+        <GlobalSchema />
         <NextIntlClientProvider>
           <CountryProvider>
             <Header />
