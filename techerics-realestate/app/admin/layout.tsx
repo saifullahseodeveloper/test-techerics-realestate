@@ -41,6 +41,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 </Link>
 
                 <Link
+                  href="/admin/dashboard/themes"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold text-teal-400 bg-teal-500/10 border border-teal-500/30 transition hover:bg-teal-500/20"
+                >
+                  <span>⚡</span> Experience Engine OS
+                </Link>
+
+                <Link
                   href="/admin/dashboard/properties"
                   className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-800 hover:text-white"
                 >

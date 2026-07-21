@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import CodeProtection from "@/components/CodeProtection";
 import GlobalSchema from "@/components/GlobalSchema";
 import { CountryProvider } from "@/lib/country-context";
+import { ThemeProvider } from "@/lib/theme-engine/theme-context";
 import "../globals.css";
 
 export function generateStaticParams() {
@@ -56,11 +57,13 @@ export default async function LocaleLayout({
         <CodeProtection />
         <GlobalSchema />
         <NextIntlClientProvider>
-          <CountryProvider>
-            <Header />
-            <div className="relative z-10">{children}</div>
-            <Footer />
-          </CountryProvider>
+          <ThemeProvider>
+            <CountryProvider>
+              <Header />
+              <div className="relative z-10">{children}</div>
+              <Footer />
+            </CountryProvider>
+          </ThemeProvider>
         </NextIntlClientProvider>
         <Analytics />
         <SpeedInsights />
