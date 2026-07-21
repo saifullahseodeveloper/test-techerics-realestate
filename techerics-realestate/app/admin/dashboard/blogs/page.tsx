@@ -11,7 +11,6 @@ export const metadata: Metadata = {
 export default async function AdminBlogsPage() {
   const session = await auth();
 
-  // Protect route
   const userRole = (session?.user as any)?.role;
   if (!session || !session.user || !["SUPER_ADMIN", "EDITOR"].includes(userRole)) {
     redirect("/admin/login?callbackUrl=/admin/dashboard/blogs");
@@ -23,66 +22,94 @@ export default async function AdminBlogsPage() {
   });
 
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-16 text-slate-100">
-      <div className="mx-auto max-w-7xl">
-        <header className="mb-10 flex items-center justify-between border-b border-slate-800 pb-6">
+    <div className="space-y-6">
+      {/* Top Header Banner */}
+      <div className="glass-panel rounded-3xl p-8 shadow-2xl">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="font-serif text-3xl font-bold text-white">Content Management System</h1>
-            <p className="mt-2 text-sm text-slate-400">Manage Area Guides and Market Trends.</p>
+            <span className="text-xs font-bold uppercase tracking-widest text-teal-400">
+              Content Management System (CMS)
+            </span>
+            <h1 className="mt-1 font-serif text-3xl font-bold text-white">Market Reports & Area Guides</h1>
+            <p className="mt-2 text-xs text-slate-400">
+              Publish real estate market trends, investment guides, and neighborhood reports.
+            </p>
           </div>
+
           <Link
             href="/admin/dashboard/blogs/new"
-            className="rounded-lg bg-teal-500 px-5 py-2.5 text-sm font-bold text-slate-950 hover:bg-teal-400 transition"
+            className="rounded-xl bg-gradient-to-r from-teal-400 to-emerald-400 px-5 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-teal-500/20 hover:opacity-90 transition"
           >
             + Create New Post
           </Link>
-        </header>
+        </div>
+      </div>
 
-        <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900 shadow-xl">
-          <table className="w-full text-left text-sm text-slate-300">
-            <thead className="bg-slate-950/50 text-xs uppercase text-slate-400">
+      {/* Blog Posts Glass Table */}
+      <div className="glass-panel rounded-3xl p-6 overflow-hidden">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-serif text-lg font-bold text-white">Articles & Reports ({blogs.length})</h2>
+          <span className="text-xs text-slate-400">Live SEO Index</span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="border-b border-slate-800 bg-slate-900/80 text-slate-400 font-semibold uppercase">
               <tr>
-                <th className="px-6 py-4 font-semibold">Title</th>
-                <th className="px-6 py-4 font-semibold">Category</th>
-                <th className="px-6 py-4 font-semibold">Author</th>
-                <th className="px-6 py-4 font-semibold">Status</th>
-                <th className="px-6 py-4 font-semibold">Date</th>
-                <th className="px-6 py-4 font-semibold text-right">Actions</th>
+                <th className="px-4 py-3">Article Title</th>
+                <th className="px-4 py-3">Category</th>
+                <th className="px-4 py-3">Author</th>
+                <th className="px-4 py-3">Publish Status</th>
+                <th className="px-4 py-3">Date</th>
+                <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-y divide-slate-800/60 text-slate-300">
               {blogs.map((blog) => (
-                <tr key={blog.id} className="hover:bg-slate-800/50 transition">
-                  <td className="px-6 py-4 font-semibold text-white">
-                    <a href={`/en/blog/${blog.slug}`} target="_blank" className="hover:text-teal-400">
+                <tr key={blog.id} className="hover:bg-slate-900/40 transition">
+                  <td className="px-4 py-3.5 font-bold text-white">
+                    <a href={`/en/blog/${blog.slug}`} target="_blank" className="hover:text-teal-400 transition">
                       {blog.title}
                     </a>
                   </td>
-                  <td className="px-6 py-4">
-                    <span className="rounded-full bg-slate-800 px-3 py-1 text-[10px] font-bold uppercase text-slate-300">
-                      {blog.category?.name || "Uncategorized"}
+                  <td className="px-4 py-3.5">
+                    <span className="rounded-full bg-slate-800 px-2.5 py-0.5 text-[10px] font-bold text-slate-300 border border-slate-700">
+                      {blog.category?.name || "Market Trends"}
                     </span>
                   </td>
-                  <td className="px-6 py-4">{blog.authorName}</td>
-                  <td className="px-6 py-4">
-                    <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase ${blog.published ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
-                      {blog.published ? "Published" : "Draft"}
+                  <td className="px-4 py-3.5 text-slate-400">{blog.authorName}</td>
+                  <td className="px-4 py-3.5">
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${
+                        blog.published
+                          ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                          : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                      }`}
+                    >
+                      {blog.published ? "Published ✓" : "Draft"}
                     </span>
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-xs">
+                  <td className="whitespace-nowrap px-4 py-3.5 text-xs text-slate-400">
                     {new Date(blog.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="text-teal-400 hover:text-teal-300 font-semibold text-xs transition">
-                      Edit
+                  <td className="px-4 py-3.5 text-right">
+                    <button className="text-xs font-bold text-teal-400 hover:underline">
+                      Edit Article →
                     </button>
                   </td>
                 </tr>
               ))}
+              {blogs.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
+                    No articles published yet. Click "+ Create New Post" to write your first report.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
