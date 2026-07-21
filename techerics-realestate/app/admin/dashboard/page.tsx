@@ -1,84 +1,133 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { auth, signOut } from "@/auth";
+import { auth } from "@/auth";
 
-export default async function AdminDashboard() {
+export default async function AdminDashboardPage() {
   const session = await auth();
-  const properties = await prisma.property.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 50,
-    include: { city: true, locality: true, listings: { take: 1, orderBy: { listedAt: "desc" } } },
-  });
+
+  // Fetch KPI Counts & Recent Properties in parallel
+  const [propertiesCount, leadsCount, blogsCount, recentProperties] = await Promise.all([
+    prisma.property.count(),
+    prisma.lead.count(),
+    prisma.blogPost.count({ where: { published: true } }),
+    prisma.property.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      include: { city: true, locality: true, listings: { take: 1, orderBy: { listedAt: "desc" } } },
+    }),
+  ]);
 
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-6 text-slate-100">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-6 flex items-center justify-between">
+    <div className="space-y-8">
+      {/* Header Banner */}
+      <div className="glass-panel rounded-3xl p-8 shadow-2xl">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-semibold">Dashboard</h1>
-            <p className="text-sm text-slate-400">
-              Welcome, {session?.user?.name ?? session?.user?.email}
+            <span className="text-xs font-bold uppercase tracking-widest text-teal-400">
+              Control Center
+            </span>
+            <h1 className="mt-1 font-serif text-3xl font-bold text-white sm:text-4xl">
+              Welcome back, {session?.user?.name || "Admin"}
+            </h1>
+            <p className="mt-2 text-xs text-slate-400">
+              Manage luxury properties, CRM leads, and market reports across your global portal.
             </p>
           </div>
-          <div className="flex gap-2">
+
+          <div className="flex gap-3">
             <Link
               href="/admin/dashboard/new"
-              className="rounded-md bg-teal-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-teal-400"
+              className="rounded-xl bg-gradient-to-r from-teal-400 to-emerald-400 px-5 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-teal-500/20 transition hover:opacity-90"
             >
-              + Add Property
+              + Add Property Listing
             </Link>
-            <form
-              action={async () => {
-                "use server";
-                await signOut();
-              }}
-            >
-              <button className="rounded-md border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">
-                Sign out
-              </button>
-            </form>
           </div>
         </div>
+      </div>
 
-        <div className="overflow-hidden rounded-xl border border-slate-800">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-900 text-left text-slate-400">
+      {/* KPI Stats Cards */}
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="glass-card rounded-2xl p-6">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Properties</span>
+            <span className="text-2xl">🏠</span>
+          </div>
+          <span className="mt-4 block font-serif text-3xl font-extrabold text-white">{propertiesCount}</span>
+          <span className="mt-1 block text-xs text-teal-400 font-semibold">Verified RERA Listings</span>
+        </div>
+
+        <div className="glass-card rounded-2xl p-6">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Leads</span>
+            <span className="text-2xl">📥</span>
+          </div>
+          <span className="mt-4 block font-serif text-3xl font-extrabold text-amber-300">{leadsCount}</span>
+          <span className="mt-1 block text-xs text-slate-400">WhatsApp & Direct Enquiries</span>
+        </div>
+
+        <div className="glass-card rounded-2xl p-6">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Blog Articles</span>
+            <span className="text-2xl">📝</span>
+          </div>
+          <span className="mt-4 block font-serif text-3xl font-extrabold text-white">{blogsCount}</span>
+          <span className="mt-1 block text-xs text-teal-400 font-semibold">Published Insights</span>
+        </div>
+
+        <div className="glass-card rounded-2xl p-6">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Global Markets</span>
+            <span className="text-2xl">🌐</span>
+          </div>
+          <span className="mt-4 block font-serif text-3xl font-extrabold text-white">14+</span>
+          <span className="mt-1 block text-xs text-teal-400 font-semibold">Countries Operating</span>
+        </div>
+      </div>
+
+      {/* Recent Properties Table */}
+      <div className="glass-panel rounded-3xl p-6 overflow-hidden">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="font-serif text-xl font-bold text-white">Recent Property Listings</h2>
+          <Link href="/admin/dashboard/properties" className="text-xs font-bold text-teal-400 hover:underline">
+            View All Properties ({propertiesCount}) →
+          </Link>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="border-b border-slate-800 bg-slate-900/60 text-slate-400 font-semibold uppercase">
               <tr>
-                <th className="p-3">Title</th>
-                <th className="p-3">Location</th>
-                <th className="p-3">Price</th>
-                <th className="p-3">SEO</th>
-                <th className="p-3"></th>
+                <th className="px-4 py-3">Property Title</th>
+                <th className="px-4 py-3">Location</th>
+                <th className="px-4 py-3">Price</th>
+                <th className="px-4 py-3">Type</th>
+                <th className="px-4 py-3">Actions</th>
               </tr>
             </thead>
-            <tbody>
-              {properties.map((p) => (
-                <tr key={p.id} className="border-t border-slate-800">
-                  <td className="p-3">{p.title}</td>
-                  <td className="p-3 text-slate-400">
-                    {p.locality.name}, {p.city.name}
+            <tbody className="divide-y divide-slate-800/60 text-slate-300">
+              {recentProperties.map((p) => (
+                <tr key={p.id} className="hover:bg-slate-900/40 transition">
+                  <td className="px-4 py-3.5 font-bold text-white">{p.title}</td>
+                  <td className="px-4 py-3.5 text-slate-400">{p.locality.name}, {p.city.name}</td>
+                  <td className="px-4 py-3.5 font-semibold text-amber-300">
+                    {p.listings[0] ? `${p.listings[0].currency} ${Number(p.listings[0].price).toLocaleString()}` : "—"}
                   </td>
-                  <td className="p-3 text-slate-400">
-                    {p.listings[0]
-                      ? `${p.listings[0].currency} ${Number(p.listings[0].price).toLocaleString()}`
-                      : "—"}
-                  </td>
-                  <td className="p-3">
-                    <span className="rounded-full bg-teal-950 px-2 py-0.5 text-xs text-teal-400">
-                      Auto-generated ✓
+                  <td className="px-4 py-3.5">
+                    <span className="rounded-full bg-teal-500/20 px-2.5 py-0.5 text-[10px] font-bold text-teal-300 border border-teal-500/30">
+                      {p.propertyType}
                     </span>
                   </td>
-                  <td className="p-3">
-                    <Link href={`/admin/dashboard/${p.id}/edit`} className="text-xs text-violet-400 hover:underline">
+                  <td className="px-4 py-3.5">
+                    <Link href={`/admin/dashboard/${p.id}/edit`} className="text-xs font-bold text-teal-400 hover:underline">
                       Edit
                     </Link>
                   </td>
                 </tr>
               ))}
-              {!properties.length && (
+              {!recentProperties.length && (
                 <tr>
-                  <td colSpan={5} className="p-6 text-center text-slate-500">
-                    No properties yet — add your first one.
+                  <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                    No property listings found. Click "+ Add Property Listing" to add your first project.
                   </td>
                 </tr>
               )}
@@ -86,6 +135,6 @@ export default async function AdminDashboard() {
           </table>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
