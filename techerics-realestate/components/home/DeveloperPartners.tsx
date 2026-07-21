@@ -29,7 +29,7 @@ export default function DeveloperPartners() {
                 {dev.name}
               </span>
               <span className="mt-1 text-[11px] text-teal-400/80 font-medium">
-                {dev.count}
+                {dev.projectsCount}
               </span>
             </div>
           ))}
