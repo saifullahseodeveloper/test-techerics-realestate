@@ -263,6 +263,8 @@ export const GLOBAL_MARKETS: Record<string, CountryMarketConfig> = {
   },
 };
 
+export const COUNTRY_MARKETS = GLOBAL_MARKETS;
+
 /** Helper to retrieve market configuration with fallback */
 export function getCountryMarket(countryCode: string): CountryMarketConfig {
   const code = (countryCode || "IN").toUpperCase();
