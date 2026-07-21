@@ -1,7 +1,7 @@
 // ============================================================
 // ENTERPRISE COUNTRY MARKET CONFIGURATION & LOCALIZATION DATASET
 // Supports 15+ international markets with native language, RTL,
-// native currency formatters, and top real estate developers.
+// native currency formatters, localized office contacts, reviews, and developers.
 // ============================================================
 
 export type DeveloperData = {
@@ -37,6 +37,22 @@ export type SampleProperty = {
   image: string;
 };
 
+export type Testimonial = {
+  quote: string;
+  name: string;
+  role: string;
+  location: string;
+  rating: number;
+  avatar: string;
+};
+
+export type Award = {
+  title: string;
+  organization: string;
+  year: string;
+  image: string;
+};
+
 export type CountryMarketConfig = {
   code: string;
   countryName: string;
@@ -47,6 +63,9 @@ export type CountryMarketConfig = {
   defaultLocale: "en" | "ar" | "hi" | "fr" | "de" | "es" | "tr" | "ja";
   nativeLanguageName: string;
   formatPrice: (amount: number) => string;
+  officeAddress: string;
+  officePhone: string;
+  officeEmail: string;
   topDevelopers: DeveloperData[];
   heroImage: string;
   heroHeadline: string;
@@ -54,6 +73,8 @@ export type CountryMarketConfig = {
   searchPlaceholder: string;
   sampleProjects: SampleProject[];
   sampleProperties: SampleProperty[];
+  testimonials: Testimonial[];
+  awards: Award[];
 };
 
 export const GLOBAL_MARKETS: Record<string, CountryMarketConfig> = {
@@ -71,6 +92,9 @@ export const GLOBAL_MARKETS: Record<string, CountryMarketConfig> = {
       if (amount >= 1000) return `AED ${(amount / 1000).toFixed(0)}K`;
       return `AED ${amount.toLocaleString()}`;
     },
+    officeAddress: "Tech Erics Tower, Downtown Boulevard, Dubai, UAE",
+    officePhone: "+971 4 300 8000",
+    officeEmail: "uae@techerics.com",
     heroImage: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1920&q=80",
     heroHeadline: "Find Your Dream Property in the UAE",
     heroSubheadline: "Explore luxury Dubai apartments, beachfront Palm Jumeirah villas, and high-yield commercial hubs.",
@@ -88,7 +112,7 @@ export const GLOBAL_MARKETS: Record<string, CountryMarketConfig> = {
     sampleProjects: [
       {
         id: "sunteck-beach-residences",
-        title: "Sunteck Beach Residences – Oceanopolis",
+        title: "EMAAR Beachfront – Oceanopolis Towers",
         location: "Dubai Marina, Dubai",
         bhk: "2, 3 & 4 BHK Luxury Apartments",
         sqft: "1,450 - 3,200 sqft",
@@ -137,6 +161,38 @@ export const GLOBAL_MARKETS: Record<string, CountryMarketConfig> = {
         image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80",
       },
     ],
+    testimonials: [
+      {
+        quote: "Buying an off-plan villa in Palm Jumeirah through Tech Erics was seamless. 100% legal clarity and direct EMAAR developer access!",
+        name: "Tariq Al Mansoori",
+        role: "Investment Director",
+        location: "Bought Villa in Palm Jumeirah",
+        rating: 5,
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
+      },
+      {
+        quote: "The 360° virtual tours saved me 3 trips to Dubai. Secured a high-yield Downtown apartment with zero commission.",
+        name: "Sarah Jenkins",
+        role: "UK Investor",
+        location: "Bought Apartment in Downtown Dubai",
+        rating: 5,
+        avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80",
+      },
+    ],
+    awards: [
+      {
+        title: "Best UAE Luxury Real Estate Portal 2025",
+        organization: "Gulf Real Estate Excellence Summit",
+        year: "2025",
+        image: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=400&q=80",
+      },
+      {
+        title: "Excellence in PropTech & Virtual Tours",
+        organization: "Middle East Tech & Realty Awards",
+        year: "2024",
+        image: "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?auto=format&fit=crop&w=400&q=80",
+      },
+    ],
   },
   IN: {
     code: "IN",
@@ -152,6 +208,9 @@ export const GLOBAL_MARKETS: Record<string, CountryMarketConfig> = {
       if (amount >= 100000) return `₹ ${(amount / 100000).toFixed(2)} Lakh`;
       return `₹ ${amount.toLocaleString("en-IN")}`;
     },
+    officeAddress: "Tech Erics Tower, BKC, Mumbai - 400051, India",
+    officePhone: "+91 22 4000 8000",
+    officeEmail: "india@techerics.com",
     heroImage: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1920&q=80",
     heroHeadline: "India's #1 Real Estate & Property Portal",
     heroSubheadline: "Discover premier residential townships, luxury penthouses, and RERA verified plots.",
@@ -206,6 +265,38 @@ export const GLOBAL_MARKETS: Record<string, CountryMarketConfig> = {
         image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
       },
     ],
+    testimonials: [
+      {
+        quote: "Tech Erics team made our Bandra home purchase completely smooth. Zero hidden charges and saved us over ₹12 Lakhs!",
+        name: "Vikram & Neha Sharma",
+        role: "IT Director & Architect",
+        location: "Bought 3 BHK in Bandra West",
+        rating: 5,
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+      },
+      {
+        quote: "As an NRI buyer, trust is paramount. Tech Erics verified all land titles and completed registration in Gurgaon.",
+        name: "Ananya Iyer",
+        role: "NRI Tech Lead",
+        location: "Bought Golf Estate in Gurgaon",
+        rating: 5,
+        avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80",
+      },
+    ],
+    awards: [
+      {
+        title: "Best Indian PropTech Platform 2025",
+        organization: "National Real Estate Excellence Summit",
+        year: "2025",
+        image: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=400&q=80",
+      },
+      {
+        title: "Highest Customer Satisfaction Award",
+        organization: "Indian Realty Consumers Forum",
+        year: "2024",
+        image: "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?auto=format&fit=crop&w=400&q=80",
+      },
+    ],
   },
   US: {
     code: "US",
@@ -221,6 +312,9 @@ export const GLOBAL_MARKETS: Record<string, CountryMarketConfig> = {
       if (amount >= 1000) return `$${(amount / 1000).toFixed(0)}K`;
       return `$${amount.toLocaleString()}`;
     },
+    officeAddress: "Tech Erics Center, 5th Ave, Manhattan, New York, NY 10001, USA",
+    officePhone: "+1 (800) 555-ERICS",
+    officeEmail: "usa@techerics.com",
     heroImage: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1920&q=80",
     heroHeadline: "Find Homes for Sale & Rent in the US",
     heroSubheadline: "Explore luxury single-family homes, Manhattan penthouses, and coastal California estates.",
@@ -258,6 +352,38 @@ export const GLOBAL_MARKETS: Record<string, CountryMarketConfig> = {
         type: "VILLA",
         purpose: "FOR SALE",
         image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
+      },
+    ],
+    testimonials: [
+      {
+        quote: "Tech Erics helped us close on our Tribeca loft with zero hassle. The WalkScore data and 360° virtual tour were 100% spot on!",
+        name: "Michael & Jessica Miller",
+        role: "Wall Street Analyst",
+        location: "Bought Condo in Manhattan, NY",
+        rating: 5,
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
+      },
+      {
+        quote: "Secured our dream Malibu coastal home through Tech Erics. Professional team with complete market analysis.",
+        name: "David Sterling",
+        role: "Tech Entrepreneur",
+        location: "Bought Ocean Villa in Malibu, CA",
+        rating: 5,
+        avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80",
+      },
+    ],
+    awards: [
+      {
+        title: "America's Best Real Estate Platform 2025",
+        organization: "US PropTech & Realty Summit",
+        year: "2025",
+        image: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=400&q=80",
+      },
+      {
+        title: "Innovation in Luxury Property Search",
+        organization: "American Real Estate Association",
+        year: "2024",
+        image: "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?auto=format&fit=crop&w=400&q=80",
       },
     ],
   },
