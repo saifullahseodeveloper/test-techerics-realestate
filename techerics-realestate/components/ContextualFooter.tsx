@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCountry } from "@/lib/country-context";
 import { GLOBAL_CITIES, GLOBAL_COUNTRIES } from "@/lib/global-locations";
 
-export default function ContextualFooter() {
+export default function ContextualFooter({ currentLocation }: { currentLocation?: string } = {}) {
   const { market, countryCode } = useCountry();
 
   // Filter cities specifically for the currently selected country
