@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getCountryMarket, GLOBAL_MARKETS } from "@/lib/country-data";
-import { GLOBAL_CITIES, GLOBAL_COUNTRIES } from "@/lib/global-locations";
+import { getCountryMarket } from "@/lib/country-data";
+import { GLOBAL_CITIES } from "@/lib/global-locations";
 import PropertyCard from "@/components/PropertyCard";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 import EmiCalculator from "@/components/EmiCalculator";
@@ -11,10 +10,9 @@ import MapEmbed from "@/components/MapEmbed";
 export const revalidate = 60;
 
 type Props = {
-  params: Promise<{ locale: string; country: string; slug: string[] }>;
+  params: Promise<{ locale: string; location: string; slug: string[] }>;
 };
 
-/** Normalizes property types from URL slug to standard format */
 function parsePropertyType(slugSegment: string): string | null {
   const s = slugSegment.toLowerCase();
   if (s.includes("apartment") || s.includes("flat")) return "Apartment";
@@ -28,7 +26,6 @@ function parsePropertyType(slugSegment: string): string | null {
   return null;
 }
 
-/** Normalizes listing purpose from URL slug */
 function parsePurpose(slugSegment: string): "SALE" | "RENT" | null {
   const s = slugSegment.toLowerCase();
   if (s.includes("sale") || s.includes("buy")) return "SALE";
@@ -36,46 +33,31 @@ function parsePurpose(slugSegment: string): "SALE" | "RENT" | null {
   return null;
 }
 
-/** Normalizes bedroom count from URL slug */
 function parseBedrooms(slugSegment: string): number | null {
-  const match = slugSegment.match(/(\d+)-bed/i) || slugSegment.match(/(\d+)-bhk/i) || slugSegment.match(/(\d+)\s*bed/i);
+  const match = slugSegment.match(/(\d+)-bed/i) || slugSegment.match(/(\d+)-bhk/i);
   return match ? parseInt(match[1], 10) : null;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale, country, slug } = await params;
-  const countryConfig = getCountryMarket(country.toUpperCase());
-  const locationName = slug ? slug[slug.length - 1].replace(/-/g, " ").toUpperCase() : countryConfig.countryName;
-
-  const title = `${locationName} Real Estate & Properties | Tech Erics`;
-  const description = `Browse verified luxury apartments, villas, and commercial properties in ${locationName}, ${countryConfig.countryName}. Best prices, zero commission deals & RERA verified listings.`;
+  const { locale, location, slug = [] } = await params;
+  const locationName = slug.length ? slug[slug.length - 1].replace(/-/g, " ").toUpperCase() : location.toUpperCase();
 
   return {
-    title,
-    description,
+    title: `${locationName} Real Estate & Properties | Tech Erics`,
+    description: `Browse verified luxury apartments, villas, and commercial properties in ${locationName}. Best prices & RERA verified listings.`,
     alternates: {
-      canonical: `/${locale}/${country.toLowerCase()}/${slug ? slug.join("/") : ""}`,
-      languages: {
-        en: `/en/${country.toLowerCase()}/${slug ? slug.join("/") : ""}`,
-        ar: `/ar/${country.toLowerCase()}/${slug ? slug.join("/") : ""}`,
-        hi: `/hi/${country.toLowerCase()}/${slug ? slug.join("/") : ""}`,
-      },
+      canonical: `/${locale}/${location}/${slug.join("/")}`,
     },
   };
 }
 
-export default async function DynamicMatrixPage({ params }: Props) {
-  const { locale, country, slug = [] } = await params;
+export default async function DynamicLocationMatrixPage({ params }: Props) {
+  const { locale, location, slug = [] } = await params;
 
-  const countryConfig = getCountryMarket(country.toUpperCase());
-  const isArabic = locale === "ar";
-  const isHindi = locale === "hi";
+  const market = getCountryMarket(location.toUpperCase());
+  const locationSegment = location.replace(/-/g, " ").toUpperCase();
+  const subLocationSegment = slug[0] ? slug[0].replace(/-/g, " ") : null;
 
-  // Parse path segments
-  const locationSegment = slug[0] ? slug[0].replace(/-/g, " ") : countryConfig.countryName;
-  const subLocationSegment = slug[1] ? slug[1].replace(/-/g, " ") : null;
-
-  // Extract filter intents
   let propertyType: string | null = null;
   let purpose: "SALE" | "RENT" | null = null;
   let bedrooms: number | null = null;
@@ -88,25 +70,18 @@ export default async function DynamicMatrixPage({ params }: Props) {
     if (seg.includes("property") || seg.length > 30) isPropertyDetail = true;
   }
 
-  // Find matching cities/localities
-  const matchedCity = GLOBAL_CITIES.find(
-    (c) => c.slug.toLowerCase() === slug[0]?.toLowerCase() || c.name.toLowerCase() === locationSegment.toLowerCase()
-  );
-
-  // If this is a single property permalink, render complete Bayut/Zillow detail layout
+  // Property detail permalink page
   if (isPropertyDetail) {
     const propTitle = slug[slug.length - 1].replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
     return (
       <main className="min-h-screen bg-slate-950 px-4 py-8 text-slate-100">
         <div className="mx-auto max-w-6xl">
-          {/* Breadcrumbs */}
           <nav aria-label="breadcrumb" className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
             <Link href={`/${locale}`} className="hover:text-teal-400">Home</Link> /{" "}
-            <Link href={`/${locale}/${country.toLowerCase()}`} className="hover:text-teal-400">{countryConfig.countryName}</Link> /{" "}
+            <Link href={`/${locale}/${location}`} className="hover:text-teal-400">{locationSegment}</Link> /{" "}
             <span className="text-teal-400">{propTitle}</span>
           </nav>
 
-          {/* Top Hero Section */}
           <div className="grid gap-8 lg:grid-cols-12 lg:items-start">
             <div className="lg:col-span-7">
               <div className="relative aspect-[16/10] w-full overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 shadow-2xl">
@@ -128,7 +103,7 @@ export default async function DynamicMatrixPage({ params }: Props) {
 
             <div className="lg:col-span-5 rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl backdrop-blur-md">
               <span className="text-xs font-bold uppercase tracking-widest text-teal-400">
-                📍 {subLocationSegment || locationSegment}, {countryConfig.countryName}
+                📍 {subLocationSegment || locationSegment}
               </span>
               <h1 className="mt-2 font-serif text-2xl font-bold text-white sm:text-3xl leading-snug">
                 {propTitle}
@@ -137,22 +112,22 @@ export default async function DynamicMatrixPage({ params }: Props) {
               <div className="mt-4 flex items-baseline gap-2">
                 <span className="text-xs font-semibold uppercase text-slate-400">Price</span>
                 <span className="font-serif text-3xl font-extrabold text-amber-300">
-                  {countryConfig.symbol} {countryConfig.currency === "INR" ? "2.95 Cr" : "2,950,000"}
+                  {market.symbol} {market.currency === "INR" ? "2.95 Cr" : "2,950,000"}
                 </span>
               </div>
 
-              {/* Location Scores Bar */}
+              {/* Location Scores */}
               <div className="mt-5 grid grid-cols-3 gap-2 border-t border-b border-slate-800 py-3 text-center text-xs">
                 <div className="rounded-xl bg-slate-950 p-2">
-                  <span className="block text-[10px] uppercase text-slate-500">WalkScore®</span>
+                  <span className="block text-[10px] uppercase text-slate-500 font-semibold">WalkScore®</span>
                   <span className="font-bold text-teal-400">🚶 88 / 100</span>
                 </div>
                 <div className="rounded-xl bg-slate-950 p-2">
-                  <span className="block text-[10px] uppercase text-slate-500">TransitScore</span>
+                  <span className="block text-[10px] uppercase text-slate-500 font-semibold">TransitScore</span>
                   <span className="font-bold text-teal-400">🚆 82 / 100</span>
                 </div>
                 <div className="rounded-xl bg-slate-950 p-2">
-                  <span className="block text-[10px] uppercase text-slate-500">SchoolScore</span>
+                  <span className="block text-[10px] uppercase text-slate-500 font-semibold">SchoolScore</span>
                   <span className="font-bold text-teal-400">🏫 94 / 100</span>
                 </div>
               </div>
@@ -163,12 +138,10 @@ export default async function DynamicMatrixPage({ params }: Props) {
             </div>
           </div>
 
-          {/* EMI & Mortgage Calculator */}
           <section className="mt-12">
             <EmiCalculator defaultPrice={29500000} />
           </section>
 
-          {/* Map & POIs */}
           <section className="mt-12 rounded-3xl border border-slate-800 bg-slate-900/60 p-6 sm:p-8">
             <h2 className="font-serif text-2xl font-bold text-white">Location & Nearby Amenities</h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-4 text-xs font-medium text-slate-300">
@@ -186,7 +159,7 @@ export default async function DynamicMatrixPage({ params }: Props) {
     );
   }
 
-  // Render Programmatic Matrix / Search Landing Page
+  // Matrix Landing Page
   const h1Title = `${bedrooms ? `${bedrooms} Bedroom ` : ""}${propertyType || "Properties"} ${
     purpose ? `for ${purpose === "SALE" ? "Sale" : "Rent"}` : "for Sale & Rent"
   } in ${subLocationSegment ? `${subLocationSegment}, ` : ""}${locationSegment}`;
@@ -194,34 +167,30 @@ export default async function DynamicMatrixPage({ params }: Props) {
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-10 text-slate-100">
       <div className="mx-auto max-w-6xl">
-        {/* Breadcrumb Trail */}
         <nav aria-label="breadcrumb" className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
           <Link href={`/${locale}`} className="hover:text-teal-400">Home</Link> /{" "}
-          <Link href={`/${locale}/${country.toLowerCase()}`} className="hover:text-teal-400">{countryConfig.countryName}</Link> /{" "}
-          <span className="text-teal-400">{locationSegment}</span>
+          <Link href={`/${locale}/${location}`} className="hover:text-teal-400">{locationSegment}</Link> /{" "}
+          <span className="text-teal-400">{subLocationSegment || "Market"}</span>
         </nav>
 
-        {/* Header Title & Market Summary */}
         <div className="rounded-3xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 p-8 shadow-2xl">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-teal-400">
-            <span>{countryConfig.flag}</span>
-            <span>{countryConfig.countryName} Real Estate Market</span>
-          </div>
+          <span className="text-xs font-bold uppercase tracking-widest text-teal-400">
+            {market.flag} Real Estate Directory
+          </span>
 
           <h1 className="mt-2 font-serif text-3xl font-extrabold text-white sm:text-4xl">
             {h1Title}
           </h1>
 
           <p className="mt-3 text-sm leading-relaxed text-slate-300 max-w-3xl">
-            Explore verified listings in {locationSegment}, {countryConfig.countryName}. Compare developer prices, floor plans, RERA approvals, and market trends across top communities.
+            Explore verified real estate listings in {subLocationSegment || locationSegment}. RERA approved projects, developer masterplans, and zero commission deals.
           </p>
 
-          {/* Quick Category Filters */}
           <div className="mt-6 flex flex-wrap gap-2 text-xs font-semibold">
             {["Apartments", "Villas", "Townhouses", "Offices", "Commercial Shops"].map((type) => (
               <Link
                 key={type}
-                href={`/${locale}/${country.toLowerCase()}/${slug[0] || "all"}/${type.toLowerCase()}/for-sale`}
+                href={`/${locale}/${location}/${type.toLowerCase()}/for-sale`}
                 className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-2 text-slate-300 hover:border-teal-400 hover:text-white transition"
               >
                 {type} in {locationSegment}
@@ -230,60 +199,39 @@ export default async function DynamicMatrixPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Property Grid */}
         <div className="mt-10">
           <h2 className="font-serif text-2xl font-bold text-white mb-6">
-            Available Properties ({countryConfig.sampleProjects.length + countryConfig.sampleProperties.length})
+            Available Listings in {subLocationSegment || locationSegment}
           </h2>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {countryConfig.sampleProjects.map((proj) => {
-              const pSlug = proj.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-              return (
-                <div key={proj.id} className="group overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
-                  <div className="relative aspect-[16/10] w-full overflow-hidden">
-                    <img src={proj.image} alt={proj.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-                    <span className="absolute top-3 left-3 rounded bg-rose-600 px-2.5 py-1 text-[10px] font-bold text-white">{proj.badge}</span>
+            {market.sampleProjects.map((proj) => (
+              <div key={proj.id} className="group overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
+                <div className="relative aspect-[16/10] w-full overflow-hidden">
+                  <img src={proj.image} alt={proj.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                  <span className="absolute top-3 left-3 rounded bg-rose-600 px-2.5 py-1 text-[10px] font-bold text-white">{proj.badge}</span>
+                </div>
+                <div className="p-5">
+                  <span className="text-xs text-teal-400 font-semibold">📍 {proj.location}</span>
+                  <h3 className="mt-1 text-base font-bold text-white group-hover:text-teal-300">{proj.title}</h3>
+                  <div className="mt-3 flex items-center justify-between border-t border-b border-slate-800 py-2.5 text-xs text-slate-400">
+                    <span>🛏️ {proj.bhk}</span>
+                    <span>📐 {proj.sqft}</span>
                   </div>
-                  <div className="p-5">
-                    <span className="text-xs text-teal-400 font-semibold">📍 {proj.location}</span>
-                    <h3 className="mt-1 text-base font-bold text-white group-hover:text-teal-300">{proj.title}</h3>
-                    <div className="mt-3 flex items-center justify-between border-t border-b border-slate-800 py-2.5 text-xs text-slate-400">
-                      <span>🛏️ {proj.bhk}</span>
-                      <span>📐 {proj.sqft}</span>
-                    </div>
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="text-base font-extrabold text-amber-300">{proj.price}</span>
-                      <Link
-                        href={`/${locale}/${country.toLowerCase()}/${slug[0] || "city"}/${pSlug}`}
-                        className="rounded-xl bg-teal-500 px-3.5 py-2 text-xs font-bold text-slate-950 hover:bg-teal-400"
-                      >
-                        View Property →
-                      </Link>
-                    </div>
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className="text-base font-extrabold text-amber-300">{proj.price}</span>
+                    <Link
+                      href={`/${locale}/${location}/${proj.id}`}
+                      className="rounded-xl bg-teal-500 px-3.5 py-2 text-xs font-bold text-slate-950 hover:bg-teal-400"
+                    >
+                      View Property →
+                    </Link>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
-
-        {/* SEO FAQs */}
-        <section className="mt-14 rounded-3xl border border-slate-800 bg-slate-900/40 p-8">
-          <h2 className="font-serif text-2xl font-bold text-white mb-4">
-            Frequently Asked Questions — {locationSegment} Real Estate
-          </h2>
-          <div className="space-y-4">
-            <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-              <h3 className="text-sm font-bold text-amber-300">What is the average price of properties in {locationSegment}?</h3>
-              <p className="mt-1 text-xs text-slate-400">Prices start from {countryConfig.symbol} {countryConfig.currency === "INR" ? "30 Lakh" : "500,000"} up to luxury penthouses.</p>
-            </div>
-            <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-              <h3 className="text-sm font-bold text-amber-300">Are properties in {locationSegment} RERA approved?</h3>
-              <p className="mt-1 text-xs text-slate-400">Yes, all featured developments are registered with official municipal and RERA authorities.</p>
-            </div>
-          </div>
-        </section>
       </div>
     </main>
   );
