@@ -1,88 +1,112 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 
-// This footer IS the SEO strategy discussed in research: keyword-rich
-// internal links that give Google (and users) a crawlable path into
-// every city/locality/budget combination. Data-driven, not hardcoded —
-// so it stays accurate as new cities/localities get added.
 export default async function Footer() {
-  const [cities, localities] = await Promise.all([
-    prisma.city.findMany({ take: 20, orderBy: { name: "asc" } }),
-    prisma.locality.findMany({
-      take: 20,
-      orderBy: { name: "asc" },
-      include: { city: true },
-    }),
-  ]);
+  let cities: { id: string; name: string; slug: string }[] = [];
+  let localities: { id: string; name: string; slug: string; city: { slug: string; name: string } }[] = [];
 
-  const budgets = [
-    { label: "Under ₹20 Lakh", slug: "under-20-lakh" },
-    { label: "₹20–50 Lakh", slug: "20-50-lakh" },
-    { label: "₹50 Lakh – 1 Cr", slug: "50lakh-1cr" },
-    { label: "Above ₹1 Cr", slug: "above-1cr" },
+  try {
+    [cities, localities] = await Promise.all([
+      prisma.city.findMany({ take: 12, orderBy: { name: "asc" } }),
+      prisma.locality.findMany({
+        take: 12,
+        orderBy: { name: "asc" },
+        include: { city: true },
+      }),
+    ]);
+  } catch (err) {
+    console.error("Footer database query fallback:", err);
+  }
+
+  const defaultCities = [
+    { id: "c1", name: "Mumbai", slug: "mumbai" },
+    { id: "c2", name: "Delhi NCR", slug: "delhi-ncr" },
+    { id: "c3", name: "Bangalore", slug: "bangalore" },
+    { id: "c4", name: "Pune", slug: "pune" },
+    { id: "c5", name: "Hyderabad", slug: "hyderabad" },
   ];
 
-  const propertyTypes = ["1 BHK", "2 BHK", "3 BHK", "Villas", "Plots", "Commercial"];
+  const displayCities = cities.length ? cities : defaultCities;
 
   return (
-    <footer className="mt-16 border-t border-slate-800 bg-navy-900 px-4 py-10 text-sm text-slate-400">
-      <div className="mx-auto grid max-w-6xl gap-8 sm:grid-cols-2 lg:grid-cols-5">
-        <FooterCol title="Popular Cities">
-          {cities.map((c) => (
-            <Link key={c.id} href={`/${c.slug}`} className="hover:text-teal-400">
-              Property in {c.name}
-            </Link>
-          ))}
-        </FooterCol>
+    <footer className="border-t border-slate-800/80 bg-slate-950 px-4 pt-16 pb-10 text-xs text-slate-400">
+      <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 lg:grid-cols-5">
+        {/* Col 1: Brand & Contact Info */}
+        <div className="lg:col-span-2">
+          <div className="flex items-center gap-2 text-xl font-bold tracking-tight text-white font-serif">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-400 font-sans font-black text-slate-950">
+              TE
+            </div>
+            <span>
+              Tech<span className="text-teal-400">Erics</span>
+            </span>
+          </div>
 
-        <FooterCol title="Popular Localities">
-          {localities.map((l) => (
-            <Link key={l.id} href={`/${l.city.slug}/${l.slug}`} className="hover:text-teal-400">
-              {l.name}, {l.city.name}
-            </Link>
-          ))}
-        </FooterCol>
+          <p className="mt-3 text-xs leading-relaxed text-slate-400 max-w-sm">
+            India's premier AI-enabled real estate brokerage. Verified luxury listings, 360° virtual tours, zero fake data, and direct developer pricing.
+          </p>
 
-        <FooterCol title="By Budget">
-          {budgets.map((b) => (
-            <Link key={b.slug} href={`/search?budget=${b.slug}`} className="hover:text-teal-400">
-              {b.label}
-            </Link>
-          ))}
-        </FooterCol>
+          <div className="mt-4 space-y-1.5 text-xs text-slate-300">
+            <p>📍 Tech Erics Tower, BKC, Mumbai - 400051</p>
+            <p>📞 +91 98765 43210 / +91 22 4000 8000</p>
+            <p>✉️ concierge@techerics.com</p>
+          </div>
+        </div>
 
-        <FooterCol title="Property Type">
-          {propertyTypes.map((t) => (
-            <Link key={t} href={`/search?type=${t}`} className="hover:text-teal-400">
-              {t}
-            </Link>
-          ))}
-        </FooterCol>
+        {/* Col 2: Top Cities */}
+        <div>
+          <h4 className="mb-3 font-semibold uppercase tracking-wider text-slate-200 text-xs">
+            Top Real Estate Cities
+          </h4>
+          <ul className="space-y-2">
+            {displayCities.map((c) => (
+              <li key={c.id}>
+                <Link href={`/${c.slug}`} className="hover:text-teal-400 transition">
+                  Properties in {c.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-        <FooterCol title="Company">
-          <Link href="/about" className="hover:text-teal-400">About Us</Link>
-          <Link href="/careers" className="hover:text-teal-400">Careers</Link>
-          <Link href="/blog" className="hover:text-teal-400">Blog</Link>
-          <Link href="/sitemap.xml" className="hover:text-teal-400">Sitemap</Link>
-          <Link href="/privacy" className="hover:text-teal-400">Privacy Policy</Link>
-          <Link href="/terms" className="hover:text-teal-400">Terms</Link>
-        </FooterCol>
+        {/* Col 3: Property Types */}
+        <div>
+          <h4 className="mb-3 font-semibold uppercase tracking-wider text-slate-200 text-xs">
+            Property Categories
+          </h4>
+          <ul className="space-y-2">
+            <li><Link href="/search?type=VILLA" className="hover:text-teal-400 transition">Luxury Villas</Link></li>
+            <li><Link href="/search?type=APARTMENT" className="hover:text-teal-400 transition">Sea-Facing Apartments</Link></li>
+            <li><Link href="/search?type=COMMERCIAL" className="hover:text-teal-400 transition">Commercial Offices</Link></li>
+            <li><Link href="/search?type=PLOT" className="hover:text-teal-400 transition">Plots & Land</Link></li>
+            <li><Link href="/new-projects" className="hover:text-teal-400 transition">New Project Launches</Link></li>
+          </ul>
+        </div>
+
+        {/* Col 4: Quick Links & Legal */}
+        <div>
+          <h4 className="mb-3 font-semibold uppercase tracking-wider text-slate-200 text-xs">
+            Company & Legal
+          </h4>
+          <ul className="space-y-2">
+            <li><Link href="/about" className="hover:text-teal-400 transition">About Tech Erics</Link></li>
+            <li><Link href="/blog" className="hover:text-teal-400 transition">Market Insights</Link></li>
+            <li><Link href="/privacy" className="hover:text-teal-400 transition">Privacy Policy</Link></li>
+            <li><Link href="/terms" className="hover:text-teal-400 transition">Terms of Service</Link></li>
+            <li><Link href="/admin/login" className="hover:text-teal-400 transition">Agent Portal Login</Link></li>
+          </ul>
+        </div>
       </div>
 
-      <div className="mx-auto mt-8 max-w-6xl border-t border-slate-800 pt-6 text-xs text-slate-500">
-        © {new Date().getFullYear()} Tech Erics. All rights reserved. | RERA compliant listings.
+      <div className="mx-auto mt-12 max-w-6xl border-t border-slate-800/80 pt-6 flex flex-col items-center justify-between gap-4 text-[11px] text-slate-500 sm:flex-row">
+        <p>© {new Date().getFullYear()} Tech Erics Real Estate Pvt Ltd. All rights reserved. RERA Registered.</p>
+        <div className="flex gap-4">
+          <a href="#" className="hover:text-slate-300">Facebook</a>
+          <a href="#" className="hover:text-slate-300">Instagram</a>
+          <a href="#" className="hover:text-slate-300">LinkedIn</a>
+          <a href="#" className="hover:text-slate-300">YouTube</a>
+        </div>
       </div>
     </footer>
-  );
-}
-
-function FooterCol({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-300">
-        {title}
-      </h3>
-      <div className="flex flex-col gap-1.5">{children}</div>
-    </div>
   );
 }

@@ -1,76 +1,59 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { prisma } from "@/lib/db";
-import SearchBar from "@/components/SearchBar";
-import PropertyCard from "@/components/PropertyCard";
+import HeroSection from "@/components/home/HeroSection";
+import FeaturedProjects from "@/components/home/FeaturedProjects";
+import DeveloperPartners from "@/components/home/DeveloperPartners";
+import PremiumProperties from "@/components/home/PremiumProperties";
+import ExploreCities from "@/components/home/ExploreCities";
+import TestimonialsSection from "@/components/home/TestimonialsSection";
+import VideoReelsSection from "@/components/home/VideoReelsSection";
+import WhyChooseUs from "@/components/home/WhyChooseUs";
+import AwardsSection from "@/components/home/AwardsSection";
+import LeadConsultationBanner from "@/components/home/LeadConsultationBanner";
+import MarketInsights from "@/components/home/MarketInsights";
 
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: "Find Verified Properties for Sale & Rent | Tech Erics",
+  title: "Find Verified Premium Properties, Luxury Villas & Apartments | Tech Erics",
   description:
-    "Search apartments, villas, plots & commercial properties with 360° tours, verified listings, and direct WhatsApp contact — across every major city.",
+    "Explore luxury apartments, sea-facing villas, commercial offices, and verified plots with 360° virtual tours and direct WhatsApp contact across India's top cities.",
 };
 
-export default async function HomePage() {
-  const [featured, cities] = await Promise.all([
-    prisma.property.findMany({
-      take: 8,
-      orderBy: { createdAt: "desc" },
-      include: { media: { take: 1 }, listings: { take: 1, orderBy: { listedAt: "desc" } } },
-    }),
-    prisma.city.findMany({ take: 12 }),
-  ]);
-
+export default function HomePage() {
   return (
-    <main>
-      {/* Hero */}
-      <section className="bg-hero-gradient px-4 py-20 text-center">
-        <h1 className="animate-fade-up text-3xl font-semibold text-slate-100 sm:text-4xl">
-          Find your next home,{" "}
-          <span className="bg-gradient-to-r from-teal-400 to-violet-400 bg-clip-text text-transparent">
-            without the guesswork
-          </span>
-        </h1>
-        <p className="mx-auto mt-3 max-w-xl text-slate-400">
-          Verified listings, 360° virtual tours, and instant WhatsApp contact —
-          across every major city.
-        </p>
-        <div className="mt-8">
-          <SearchBar />
-        </div>
-      </section>
+    <main className="min-h-screen bg-slate-950 text-slate-100 selection:bg-teal-500 selection:text-slate-950">
+      {/* 1. Hero Section matching reference image */}
+      <HeroSection />
 
-      {/* Cities grid */}
-      <section className="mx-auto max-w-6xl px-4 py-10">
-        <h2 className="mb-4 text-lg font-medium text-slate-200">Explore by City</h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-6">
-          {cities.map((c) => (
-            <Link
-              key={c.id}
-              href={`/${c.slug}`}
-              className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-4 text-center text-sm text-slate-300 transition hover:border-teal-500/50 hover:text-teal-400"
-            >
-              {c.name}
-            </Link>
-          ))}
-        </div>
-      </section>
+      {/* 2. Featured / Hot Projects Carousel */}
+      <FeaturedProjects />
 
-      {/* Featured listings */}
-      <section className="mx-auto max-w-6xl px-4 py-10">
-        <h2 className="mb-4 text-lg font-medium text-slate-200">Featured Properties</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {featured.map((p) => (
-            <PropertyCard key={p.id} property={p} />
-          ))}
-          {!featured.length && (
-            <p className="col-span-full text-slate-500">
-              No properties yet — add your first listing from the admin dashboard.
-            </p>
-          )}
-        </div>
-      </section>
+      {/* 3. Trusted Developer Partners Banner */}
+      <DeveloperPartners />
+
+      {/* 4. Premium Properties Showcase */}
+      <PremiumProperties />
+
+      {/* 5. Explore by City Grid */}
+      <ExploreCities />
+
+      {/* 6. Real Stories from Happy Homeowners (Testimonials) */}
+      <TestimonialsSection />
+
+      {/* 7. Property Video Walkthroughs & Reels */}
+      <VideoReelsSection />
+
+      {/* 8. Why Choose Us (The Tech Erics Advantage) */}
+      <WhyChooseUs />
+
+      {/* 9. Awards & Industry Accolades */}
+      <AwardsSection />
+
+      {/* 10. Free Lead Consultation VIP Banner */}
+      <LeadConsultationBanner />
+
+      {/* 11. Property Guides & Market Insights (Blog) */}
+      <MarketInsights />
     </main>
   );
 }
