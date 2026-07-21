@@ -29,7 +29,7 @@ async function main() {
 
     for (const cityItem of matchingCities) {
       const city = await prisma.city.upsert({
-        where: { regionId_slug: { regionId: region.id, slug: cityItem.slug } },
+        where: { slug: cityItem.slug },
         update: { seoContent: cityItem.seoDescription },
         create: {
           name: cityItem.name,
