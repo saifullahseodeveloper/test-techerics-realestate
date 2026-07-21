@@ -16,7 +16,7 @@ async function main() {
     const country = await prisma.country.upsert({
       where: { code: cData.code },
       update: { name: cData.name } as any,
-      create: { code: cData.code, slug: cData.slug },
+      create: { code: cData.code, slug: cData.slug, name: cData.name },
     });
 
     const region = await prisma.region.upsert({
