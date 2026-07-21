@@ -1,39 +1,33 @@
-import type { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
-import { GLOBAL_MARKETS } from "@/lib/country-data";
+import { useCountry } from "@/lib/country-context";
 
-export const metadata: Metadata = {
-  title: "New Project Launches — Off-Plan & Under Construction Properties | Tech Erics",
-  description: "Discover the latest new project launches and off-plan developments by EMAAR, DAMAC, Godrej, DLF and top developers across Dubai, India, London & worldwide.",
-};
-
-export default async function NewProjectsPage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
-  const allDevs = Object.values(GLOBAL_MARKETS).flatMap((m) =>
-    m.topDevelopers.map((d) => ({ ...d, country: m.countryName, countrySlug: m.slug }))
-  );
-  const allProjects = Object.values(GLOBAL_MARKETS).flatMap((m) =>
-    m.sampleProjects.map((p) => ({ ...p, country: m.countryName, symbol: m.symbol }))
-  );
+export default function NewProjectsPage() {
+  const { market } = useCountry();
 
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-16 text-slate-100">
       <div className="mx-auto max-w-6xl">
-        <span className="text-xs font-bold uppercase tracking-widest text-teal-400">New Launches</span>
+        <span className="text-xs font-bold uppercase tracking-widest text-teal-400">
+          {market.flag} New Launches in {market.countryName}
+        </span>
         <h1 className="mt-2 font-serif text-3xl font-bold text-white sm:text-5xl">
-          New Project Launches & Off-Plan Developments
+          New Project Launches & Off-Plan Developments in {market.countryName}
         </h1>
         <p className="mt-4 max-w-2xl text-sm text-slate-400 leading-relaxed">
-          Get early access to the latest off-plan and under-construction projects by top developers worldwide. RERA registered with payment plan options.
+          Get early access to the latest off-plan and under-construction projects by top developers in {market.countryName}. RERA registered with flexible payment plan options.
         </p>
 
-        {/* Featured Projects */}
-        <h2 className="mt-12 font-serif text-xl font-bold text-white">Featured New Projects</h2>
+        {/* Featured Projects for Active Market */}
+        <h2 className="mt-12 font-serif text-xl font-bold text-white">
+          Featured Off-Plan Projects ({market.countryName})
+        </h2>
         <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {allProjects.map((proj) => (
+          {market.sampleProjects.map((proj) => (
             <Link
               key={proj.id}
-              href={`/${locale}/property/${proj.id}`}
+              href={`/${market.slug}/property/${proj.id}`}
               className="group overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-lg transition hover:border-teal-400"
             >
               <div className="relative aspect-[16/10] overflow-hidden">
@@ -52,16 +46,18 @@ export default async function NewProjectsPage({ params }: { params: Promise<{ lo
           ))}
         </div>
 
-        {/* Developers */}
-        <h2 className="mt-14 font-serif text-xl font-bold text-white">Top Developers</h2>
+        {/* Developers in Active Market */}
+        <h2 className="mt-14 font-serif text-xl font-bold text-white">
+          Top Developers in {market.countryName}
+        </h2>
         <div className="mt-4 flex flex-wrap gap-2">
-          {allDevs.slice(0, 16).map((dev) => (
+          {market.topDevelopers.map((dev) => (
             <Link
               key={dev.slug}
-              href={`/${locale}/developers/${dev.slug}`}
+              href={`/${market.slug}/developers/${dev.slug}`}
               className="rounded-full border border-slate-800 bg-slate-900 px-4 py-2 text-xs font-semibold text-slate-300 hover:border-teal-400 hover:text-white transition"
             >
-              {dev.logo} {dev.name}
+              {dev.logo} {dev.name} ({dev.projectsCount})
             </Link>
           ))}
         </div>
