@@ -12,7 +12,8 @@ export default async function AdminBlogsPage() {
   const session = await auth();
 
   // Protect route
-  if (!session || !session.user || !["SUPER_ADMIN", "EDITOR"].includes(session.user.role as string)) {
+  const userRole = (session?.user as any)?.role;
+  if (!session || !session.user || !["SUPER_ADMIN", "EDITOR"].includes(userRole)) {
     redirect("/admin/login?callbackUrl=/admin/dashboard/blogs");
   }
 

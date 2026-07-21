@@ -11,7 +11,8 @@ export default async function AdminLeadsPage() {
   const session = await auth();
 
   // Protect route
-  if (!session || !session.user || !["SUPER_ADMIN", "EDITOR", "AGENT"].includes(session.user.role as string)) {
+  const userRole = (session?.user as any)?.role;
+  if (!session || !session.user || !["SUPER_ADMIN", "EDITOR", "AGENT"].includes(userRole)) {
     redirect("/admin/login?callbackUrl=/admin/dashboard/leads");
   }
 
