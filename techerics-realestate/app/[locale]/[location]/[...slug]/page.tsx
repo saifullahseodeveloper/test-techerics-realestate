@@ -177,17 +177,17 @@ export default async function DynamicLocationMatrixPage({ params }: Props) {
           <span className="text-teal-400">{subLocationSegment || "Market"}</span>
         </nav>
 
-        <div className="rounded-3xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 p-8 shadow-2xl">
+        <div className="glass-panel rounded-3xl p-8 sm:p-10 shadow-2xl">
           <div className="flex items-center gap-3">
             <span className="text-xs font-bold uppercase tracking-widest text-teal-400">
               {market.flag} Real Estate Directory
             </span>
-            <span className={`rounded-md px-2.5 py-0.5 text-[10px] font-extrabold uppercase ${currentPurpose === "SALE" ? "bg-rose-500/20 text-rose-300 border border-rose-500/30" : "bg-teal-500/20 text-teal-300 border border-teal-500/30"}`}>
+            <span className={`rounded-full px-3 py-0.5 text-[10px] font-extrabold uppercase backdrop-blur-md ${currentPurpose === "SALE" ? "bg-rose-500/20 text-rose-300 border border-rose-500/30" : "bg-teal-500/20 text-teal-300 border border-teal-500/30"}`}>
               PROPERTIES {currentPurpose === "SALE" ? "FOR SALE" : "FOR RENT"}
             </span>
           </div>
 
-          <h1 className="mt-2 font-serif text-3xl font-extrabold text-white sm:text-4xl">
+          <h1 className="mt-3 font-serif text-3xl font-extrabold text-white sm:text-5xl leading-tight">
             {h1Title}
           </h1>
 
@@ -195,13 +195,13 @@ export default async function DynamicLocationMatrixPage({ params }: Props) {
             Explore verified real estate {currentPurpose === "SALE" ? "buy options and developer masterplans" : "rental listings and commercial leases"} in {subLocationSegment || locationSegment}. RERA approved projects with zero commission.
           </p>
 
-          {/* Dedicated Intent Toggle Links */}
+          {/* Dedicated Intent Toggle Links with Glassmorphism pills */}
           <div className="mt-6 flex flex-wrap gap-2 text-xs font-semibold">
             {["Apartments", "Villas", "Townhouses", "Offices", "Commercial Shops"].map((type) => (
               <Link
                 key={type}
                 href={`/${locale}/${location}/${subLocationSegment ? `${subLocationSegment.toLowerCase().replace(/\s+/g, "-")}/` : ""}${type.toLowerCase()}/${currentPurpose === "SALE" ? "for-sale" : "for-rent"}`}
-                className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-2 text-slate-300 hover:border-teal-400 hover:text-white transition"
+                className="glass-pill rounded-xl px-4 py-2 text-slate-300 hover:text-white transition"
               >
                 {type} {purposeText} in {subLocationSegment || locationSegment}
               </Link>
@@ -216,7 +216,7 @@ export default async function DynamicLocationMatrixPage({ params }: Props) {
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {market.sampleProjects.map((proj) => (
-              <div key={proj.id} className="group overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
+              <div key={proj.id} className="glass-card group overflow-hidden rounded-2xl transition-all duration-300">
                 <div className="relative aspect-[16/10] w-full overflow-hidden">
                   <img src={proj.image} alt={proj.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                   <span className={`absolute top-3 left-3 rounded px-2.5 py-1 text-[10px] font-bold text-white ${currentPurpose === "SALE" ? "bg-rose-600" : "bg-teal-600"}`}>

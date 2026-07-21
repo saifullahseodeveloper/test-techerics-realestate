@@ -49,12 +49,14 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"}>
-      <body className="min-h-screen bg-slate-950 font-sans text-slate-100 antialiased">
+      <body className="min-h-screen bg-slate-950 font-sans text-slate-100 antialiased relative overflow-x-hidden">
+        <div className="ambient-glow-1" />
+        <div className="ambient-glow-2" />
         <CodeProtection />
         <NextIntlClientProvider>
           <CountryProvider>
             <Header />
-            {children}
+            <div className="relative z-10">{children}</div>
             <Footer />
           </CountryProvider>
         </NextIntlClientProvider>
