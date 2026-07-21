@@ -10,7 +10,7 @@ export const revalidate = 3600;
 type Props = { params: Promise<{ locale: string; city: string }> };
 
 async function getCityData(citySlug: string) {
-  return prisma.city.findUnique({
+  return prisma.city.findFirst({
     where: { slug: citySlug },
     include: {
       localities: { take: 30 },
