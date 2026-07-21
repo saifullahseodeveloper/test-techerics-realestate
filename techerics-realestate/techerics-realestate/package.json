@@ -33,6 +33,7 @@
     "tsx": "^4.19.0",
     "dotenv": "^16.4.7",
     "postcss": "^8.4.49",
+    "@tailwindcss/postcss": "^4.0.0",
     "autoprefixer": "^10.4.20",
     "@types/react": "^19.0.0",
     "@types/node": "^22.0.0"
