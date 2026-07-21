@@ -43,70 +43,73 @@ export default function FeaturedProjects() {
 
         {/* Dynamic Country Projects Grid */}
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {market.sampleProjects.map((project) => (
-            <div
-              key={project.id}
-              className="group overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-950 transition-all duration-300 hover:-translate-y-1 hover:border-teal-500/50 hover:shadow-xl hover:shadow-teal-500/10"
-            >
-              <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-900">
-                <img
-                  src={project.image}
-                  alt={project.title}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+          {market.sampleProjects.map((project) => {
+            const projectSlug = project.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+            return (
+              <div
+                key={project.id}
+                className="group overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-950 transition-all duration-300 hover:-translate-y-1 hover:border-teal-500/50 hover:shadow-xl hover:shadow-teal-500/10"
+              >
+                <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-900">
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
 
-                <span className="absolute top-3 left-3 rounded-md bg-rose-500/90 px-2.5 py-1 text-[10px] font-bold tracking-wider text-white shadow-md backdrop-blur">
-                  {project.badge}
-                </span>
+                  <span className="absolute top-3 left-3 rounded-md bg-rose-500/90 px-2.5 py-1 text-[10px] font-bold tracking-wider text-white shadow-md backdrop-blur">
+                    {project.badge}
+                  </span>
 
-                <span className="absolute top-3 right-3 rounded-md bg-slate-900/90 px-2.5 py-1 text-[11px] font-medium text-slate-200 backdrop-blur border border-slate-700">
-                  {project.developer}
-                </span>
-              </div>
-
-              <div className="p-5">
-                <div className="flex items-center justify-between text-xs text-teal-400">
-                  <span>📍 {project.location}</span>
-                  <span className="font-semibold">{project.status}</span>
+                  <span className="absolute top-3 right-3 rounded-md bg-slate-900/90 px-2.5 py-1 text-[11px] font-medium text-slate-200 backdrop-blur border border-slate-700">
+                    {project.developer}
+                  </span>
                 </div>
 
-                <h3 className="mt-2 text-lg font-semibold text-white group-hover:text-teal-300">
-                  {project.title}
-                </h3>
-
-                <div className="mt-3 flex items-center justify-between border-t border-b border-slate-800/80 py-2.5 text-xs text-slate-400">
-                  <span>🛏️ {project.bhk}</span>
-                  <span>📐 {project.sqft}</span>
-                </div>
-
-                <div className="mt-4 flex items-center justify-between">
-                  <div>
-                    <span className="block text-[11px] uppercase tracking-wider text-slate-500">Starting From</span>
-                    <span className="text-base font-bold text-teal-300">{project.price}</span>
+                <div className="p-5">
+                  <div className="flex items-center justify-between text-xs text-teal-400">
+                    <span>📍 {project.location}</span>
+                    <span className="font-semibold">{project.status}</span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <a
-                      href={`https://wa.me/919876543210?text=Hi,%20I'm%20interested%20in%20${encodeURIComponent(project.title)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-xl bg-emerald-500/10 p-2 text-emerald-400 transition hover:bg-emerald-500/20"
-                      title="Enquire on WhatsApp"
-                    >
-                      💬
-                    </a>
-                    <Link
-                      href={`/search?q=${encodeURIComponent(project.location)}`}
-                      className="rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-teal-500 hover:text-slate-950"
-                    >
-                      View Details
-                    </Link>
+                  <h3 className="mt-2 text-lg font-semibold text-white group-hover:text-teal-300">
+                    <Link href={`/projects/${projectSlug}`}>{project.title}</Link>
+                  </h3>
+
+                  <div className="mt-3 flex items-center justify-between border-t border-b border-slate-800/80 py-2.5 text-xs text-slate-400">
+                    <span>🛏️ {project.bhk}</span>
+                    <span>📐 {project.sqft}</span>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between">
+                    <div>
+                      <span className="block text-[11px] uppercase tracking-wider text-slate-500">Starting From</span>
+                      <span className="text-base font-bold text-teal-300">{project.price}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={`https://wa.me/919876543210?text=Hi,%20I'm%20interested%20in%20${encodeURIComponent(project.title)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-xl bg-emerald-500/10 p-2 text-emerald-400 transition hover:bg-emerald-500/20"
+                        title="Enquire on WhatsApp"
+                      >
+                        💬
+                      </a>
+                      <Link
+                        href={`/projects/${projectSlug}`}
+                        className="rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-teal-500 hover:text-slate-950"
+                      >
+                        View Details →
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
