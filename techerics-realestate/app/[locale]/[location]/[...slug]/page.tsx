@@ -4,6 +4,8 @@ import { getCountryMarket } from "@/lib/country-data";
 import { GLOBAL_CITIES } from "@/lib/global-locations";
 import PropertyCard from "@/components/PropertyCard";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
+import ContextualFooter from "@/components/ContextualFooter";
+import LocalizedFaqAccordion from "@/components/seo/LocalizedFaqAccordion";
 import EmiCalculator from "@/components/EmiCalculator";
 import MapEmbed from "@/components/MapEmbed";
 import DynamicSeoBlock from "@/components/DynamicSeoBlock";
@@ -283,6 +285,12 @@ export default async function DynamicLocationMatrixPage({ params }: Props) {
             ))}
           </div>
         </div>
+
+        {/* Programmatic SEO Localized FAQs */}
+        <LocalizedFaqAccordion locationName={subLocationSegment || locationSegment} />
+
+        {/* Spider-Mesh Internal Directory */}
+        <ContextualFooter currentLocation={locationSegment} />
 
         {/* Phase 4 Dynamic Content Engine Block */}
         <DynamicSeoBlock

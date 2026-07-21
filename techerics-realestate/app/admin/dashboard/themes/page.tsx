@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTheme } from "@/lib/theme-engine/theme-context";
 import { DesignTokens, ThemeCategory } from "@/lib/theme-engine/tokens";
+import { synthesizeAiTheme } from "@/lib/theme-engine/ai-synthesizer";
 
 export default function GlobalTemplateIntelligenceEngine() {
   const { activeTheme, setThemeId, availableThemes, exportThemeJson, importThemeJson } = useTheme();
@@ -33,11 +34,16 @@ export default function GlobalTemplateIntelligenceEngine() {
     setIsGenerating(true);
     setMessage("");
 
-    setTimeout(() => {
+    try {
+      const generatedTheme = synthesizeAiTheme(aiPrompt);
+      setThemeId(generatedTheme.id);
       setIsGenerating(false);
-      setMessage("AI Template synthesized and added to Knowledge Base!");
+      setMessage(`✨ AI Theme "${generatedTheme.name}" synthesized, saved, and activated sitewide!`);
       setAiPrompt("");
-    }, 1200);
+    } catch (err) {
+      console.error(err);
+      setIsGenerating(false);
+    }
   };
 
   const handleExport = () => {
