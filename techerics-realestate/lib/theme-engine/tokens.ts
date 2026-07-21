@@ -1,20 +1,29 @@
 // ============================================================
-// ENTERPRISE EXPERIENCE ENGINE — DESIGN TOKENS & SCHEMA
-// Defines theme variables, typography, animations, and variant styles.
+// GLOBAL REAL ESTATE TEMPLATE INTELLIGENCE ENGINE — TAXONOMY
+// Synthesizes design patterns from Bayut, Zillow, PropertyFinder,
+// Rightmove, Compass, Redfin, MagicBricks, and Idealista.
 // ============================================================
 
-export type ThemeCategory =
-  | "LUXURY"
-  | "MINIMAL"
-  | "ENTERPRISE"
-  | "CYBER"
-  | "EDITORIAL"
-  | "FUTURISTIC";
+export type TemplateCategory =
+  | "LUXURY_ESTATE"
+  | "MINIMAL_COMPASS"
+  | "ENTERPRISE_BAYUT"
+  | "EDITORIAL_MAGAZINE"
+  | "GLASSMORPHISM_DARK"
+  | "MAP_FIRST_ZILLOW"
+  | "COMMERCIAL_PORTAL"
+  | "ECO_SUSTAINABLE";
+
+export type MarketPattern = {
+  region: string;
+  sourceInspiration: string; // e.g. "Bayut & PropertyFinder UX"
+  keyPatterns: string[];
+};
 
 export type DesignTokens = {
   id: string;
   name: string;
-  category: ThemeCategory;
+  category: TemplateCategory;
   description: string;
   version: string;
   performanceScore: number;
@@ -22,6 +31,8 @@ export type DesignTokens = {
   accessibilityScore: number;
   previewColor: string;
   badge: string;
+  isFavorite?: boolean;
+  marketPattern: MarketPattern;
   styles: {
     bg: string;
     text: string;
@@ -38,8 +49,8 @@ export type DesignTokens = {
     buttonText: string;
     pillBg: string;
     pillText: string;
-    radius: string; // e.g. "rounded-2xl" or "rounded-none"
-    glassBlur: string; // e.g. "backdrop-blur-xl"
+    radius: string;
+    glassBlur: string;
     shadow: string;
   };
 };
