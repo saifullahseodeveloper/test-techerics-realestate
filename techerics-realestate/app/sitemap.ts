@@ -1,52 +1,75 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
+import { GLOBAL_CITIES, GLOBAL_COUNTRIES } from "@/lib/global-locations";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://techerics.com";
 const LOCALES = ["en", "hi", "ar"];
 
-// Next.js is file ko khud /sitemap.xml pe serve karta hai.
-// 50,000 URL se zyada hone par Next.js automatically sitemap
-// index + chunked sitemaps bana deta hai (Zillow jaisa pattern).
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [properties, cities, localities] = await Promise.all([
-    prisma.property.findMany({ select: { slug: true, updatedAt: true } }),
-    prisma.city.findMany({ select: { slug: true } }),
-    prisma.locality.findMany({
-      select: { slug: true, city: { select: { slug: true } } },
-    }),
-  ]);
+  let dbProperties: { slug: string; updatedAt: Date }[] = [];
+  let dbCities: { slug: string }[] = [];
+  let dbLocalities: { slug: string; city: { slug: string } }[] = [];
+
+  try {
+    [dbProperties, dbCities, dbLocalities] = await Promise.all([
+      prisma.property.findMany({ select: { slug: true, updatedAt: true } }),
+      prisma.city.findMany({ select: { slug: true } }),
+      prisma.locality.findMany({
+        select: { slug: true, city: { select: { slug: true } } },
+      }),
+    ]);
+  } catch (err) {
+    console.error("Sitemap DB fetch fallback:", err);
+  }
 
   const entries: MetadataRoute.Sitemap = [];
 
   for (const locale of LOCALES) {
+    // 1. Homepage for each locale
     entries.push({
       url: `${SITE_URL}/${locale}`,
       changeFrequency: "daily",
-      priority: 1,
+      priority: 1.0,
     });
 
-    for (const p of properties) {
+    // 2. Global Countries
+    for (const country of GLOBAL_COUNTRIES) {
       entries.push({
-        url: `${SITE_URL}/${locale}/property/${p.slug}`,
-        lastModified: p.updatedAt,
-        changeFrequency: "daily",
+        url: `${SITE_URL}/${locale}/search?country=${country.code}`,
+        changeFrequency: "weekly",
         priority: 0.8,
       });
     }
 
-    for (const c of cities) {
+    // 3. Global Cities (merged DB + predefined)
+    const allCitySlugs = Array.from(
+      new Set([...dbCities.map((c) => c.slug), ...GLOBAL_CITIES.map((c) => c.slug)])
+    );
+
+    for (const slug of allCitySlugs) {
       entries.push({
-        url: `${SITE_URL}/${locale}/${c.slug}`,
+        url: `${SITE_URL}/${locale}/${slug}`,
         changeFrequency: "daily",
         priority: 0.9,
       });
     }
 
-    for (const l of localities) {
+    // 4. Localities
+    for (const l of dbLocalities) {
       entries.push({
         url: `${SITE_URL}/${locale}/${l.city.slug}/${l.slug}`,
-        changeFrequency: "daily",
+        changeFrequency: "weekly",
         priority: 0.7,
+      });
+    }
+
+    // 5. Properties
+    for (const p of dbProperties) {
+      entries.push({
+        url: `${SITE_URL}/${locale}/property/${p.slug}`,
+        lastModified: p.updatedAt,
+        changeFrequency: "daily",
+        priority: 0.8,
       });
     }
   }
