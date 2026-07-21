@@ -5,33 +5,28 @@ import { Redis } from "@upstash/redis";
 // (plain Node Redis clients need TCP, which Edge doesn't support). In-memory
 // counters don't work either — Vercel serverless invocations are isolated,
 // so each one would have its own counter and the limit would be meaningless.
-const redis = Redis.fromEnv();
+const url = process.env.UPSTASH_REDIS_REST_URL;
+const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-// Leads form: generous enough for a real visitor filling multiple enquiries,
-// strict enough to stop scripted spam floods.
-export const leadsRatelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(5, "60 s"),
-  prefix: "rl:leads",
-  analytics: true,
-});
+const redis = url && token ? new Redis({ url, token }) : null;
 
-// Upload URL requests: an agent uploading a full photo set (~20-30 files)
-// in one go should never get throttled — set above realistic batch size.
-export const uploadRatelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(60, "60 s"),
-  prefix: "rl:upload",
-  analytics: true,
-});
+function createFallbackRatelimit() {
+  return {
+    limit: async () => ({ success: true, limit: 100, remaining: 99, reset: 0 }),
+  };
+}
 
-// Login attempts: brute-force protection.
-export const authRatelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(5, "15 m"),
-  prefix: "rl:auth",
-  analytics: true,
-});
+export const leadsRatelimit = redis
+  ? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "60 s"), prefix: "rl:leads", analytics: true })
+  : (createFallbackRatelimit() as unknown as Ratelimit);
+
+export const uploadRatelimit = redis
+  ? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, "60 s"), prefix: "rl:upload", analytics: true })
+  : (createFallbackRatelimit() as unknown as Ratelimit);
+
+export const authRatelimit = redis
+  ? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "15 m"), prefix: "rl:auth", analytics: true })
+  : (createFallbackRatelimit() as unknown as Ratelimit);
 
 /** Vercel sets x-forwarded-for reliably; other hosts may need adjusting. */
 export function getClientIp(req: Request): string {

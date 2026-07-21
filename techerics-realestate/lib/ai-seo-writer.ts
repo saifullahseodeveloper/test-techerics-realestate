@@ -13,7 +13,11 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+function getGenAI() {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return null;
+  return new GoogleGenAI({ apiKey });
+}
 
 type RawPropertyInput = {
   propertyType: string;
@@ -36,6 +40,16 @@ type SeoContent = {
 export async function generatePropertySeoContent(
   input: RawPropertyInput
 ): Promise<SeoContent> {
+  const ai = getGenAI();
+  if (!ai) {
+    return {
+      title: `${input.bedrooms ? `${input.bedrooms} BHK ` : ""}${input.propertyType} in ${input.localityName}, ${input.cityName}`,
+      metaTitle: `${input.propertyType} for Sale in ${input.localityName}, ${input.cityName}`,
+      metaDescription: `Explore ${input.propertyType} in ${input.localityName}, ${input.cityName}. ${input.areaSqft ? `${input.areaSqft} sqft.` : ""} Contact for price and details.`,
+      description: `${input.rawNotes || `Spacious ${input.propertyType} located in ${input.localityName}, ${input.cityName}.`}`,
+    };
+  }
+
   const prompt = `You are an expert real estate SEO copywriter. Given these raw property details, generate SEO-optimized content.
 
 Property type: ${input.propertyType}
