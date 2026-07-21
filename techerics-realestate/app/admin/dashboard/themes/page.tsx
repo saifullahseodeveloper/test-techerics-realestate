@@ -108,7 +108,7 @@ export default function GlobalTemplateIntelligenceEngine() {
           <h2 className="font-serif text-xl font-bold text-white">AI Template Pattern Synthesizer</h2>
         </div>
         <p className="text-xs text-slate-400 mb-4">
-          Synthesize design patterns from Bayut, Zillow, Compass, or Idealista to generate brand new original templates.
+          Synthesize design principles from Apple, Stripe, Bayut, Zillow, Compass, or Ritz-Carlton into new original templates.
         </p>
 
         <form onSubmit={handleGenerateAiTheme} className="flex flex-col sm:flex-row gap-3">
@@ -116,7 +116,7 @@ export default function GlobalTemplateIntelligenceEngine() {
             type="text"
             value={aiPrompt}
             onChange={(e) => setAiPrompt(e.target.value)}
-            placeholder="e.g. Generate a luxury monochromatic homepage inspired by Compass & Sotheby's with champagne gold accents..."
+            placeholder="e.g. Synthesize a luxury monochromatic layout using Ritz-Carlton storytelling & Apple typography..."
             className="flex-1 rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-xs text-slate-100 placeholder-slate-500 focus:border-teal-400 focus:outline-none"
           />
           <button
@@ -124,9 +124,31 @@ export default function GlobalTemplateIntelligenceEngine() {
             disabled={isGenerating}
             className="rounded-xl bg-gradient-to-r from-teal-400 to-emerald-400 px-6 py-3 text-xs font-bold text-slate-950 shadow-lg shadow-teal-500/20 hover:opacity-90 disabled:opacity-50"
           >
-            {isGenerating ? "Synthesizing Patterns..." : "✨ Synthesize Template"}
+            {isGenerating ? "Synthesizing DNA..." : "✨ Synthesize Template"}
           </button>
         </form>
+      </div>
+
+      {/* Design DNA Intelligence Matrix */}
+      <div className="glass-panel rounded-3xl p-6 sm:p-8">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-xl">🧬</span>
+          <div>
+            <h2 className="font-serif text-xl font-bold text-white">Design DNA & Principle Intelligence Base</h2>
+            <p className="text-xs text-slate-400">Abstracted layout structures, typography scales, motion physics, and storytelling patterns.</p>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+            <span className="text-xs font-bold text-teal-400 uppercase">Apple & Linear Design DNA:</span>
+            <p className="mt-1 text-xs text-slate-300">San Francisco tracking (-0.03em), 8pt grid rhythm, spring motion physics cubic-bezier(0.16, 1, 0.3, 1).</p>
+          </div>
+          <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+            <span className="text-xs font-bold text-amber-400 uppercase">Dubai Luxury Hospitality DNA:</span>
+            <p className="mt-1 text-xs text-slate-300">Champagne gold foil accents, editorial serif display headers, high-yield ROI storytelling narratives.</p>
+          </div>
+        </div>
       </div>
 
       {/* Search & Category Filter */}
