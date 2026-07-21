@@ -67,7 +67,7 @@ export default async function AdminPropertiesPage() {
                   </td>
                   <td className="px-6 py-4">
                     <span className="rounded bg-slate-800 px-2 py-1 text-[10px] font-bold uppercase text-slate-300">
-                      {property.type}
+                      {property.propertyType}
                     </span>
                   </td>
                   <td className="px-6 py-4">
