@@ -1,19 +1,12 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import SpiderInternalLinks from "@/components/SpiderInternalLinks";
 
 export default async function Footer() {
   let cities: { id: string; name: string; slug: string }[] = [];
-  let localities: { id: string; name: string; slug: string; city: { slug: string; name: string } }[] = [];
 
   try {
-    [cities, localities] = await Promise.all([
-      prisma.city.findMany({ take: 12, orderBy: { name: "asc" } }),
-      prisma.locality.findMany({
-        take: 12,
-        orderBy: { name: "asc" },
-        include: { city: true },
-      }),
-    ]);
+    cities = await prisma.city.findMany({ take: 12, orderBy: { name: "asc" } });
   } catch (err) {
     console.error("Footer database query fallback:", err);
   }
@@ -29,8 +22,11 @@ export default async function Footer() {
   const displayCities = cities.length ? cities : defaultCities;
 
   return (
-    <footer className="border-t border-slate-800/80 bg-slate-950 px-4 pt-16 pb-10 text-xs text-slate-400">
-      <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 lg:grid-cols-5">
+    <footer className="border-t border-slate-800/80 bg-slate-950 text-xs text-slate-400">
+      {/* Interconnected Spider-Mesh Internal Links */}
+      <SpiderInternalLinks />
+
+      <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 lg:grid-cols-5 px-4 pt-12 pb-10">
         {/* Col 1: Brand & Contact Info */}
         <div className="lg:col-span-2">
           <div className="flex items-center gap-2 text-xl font-bold tracking-tight text-white font-serif">
@@ -43,7 +39,7 @@ export default async function Footer() {
           </div>
 
           <p className="mt-3 text-xs leading-relaxed text-slate-400 max-w-sm">
-            India's premier AI-enabled real estate brokerage. Verified luxury listings, 360° virtual tours, zero fake data, and direct developer pricing.
+            Enterprise global real estate portal. Verified luxury listings, 360° virtual tours, zero fake data, and direct developer masterplans.
           </p>
 
           <div className="mt-4 space-y-1.5 text-xs text-slate-300">
@@ -98,7 +94,7 @@ export default async function Footer() {
         </div>
       </div>
 
-      <div className="mx-auto mt-12 max-w-6xl border-t border-slate-800/80 pt-6 flex flex-col items-center justify-between gap-4 text-[11px] text-slate-500 sm:flex-row">
+      <div className="mx-auto max-w-6xl border-t border-slate-800/80 px-4 py-6 flex flex-col items-center justify-between gap-4 text-[11px] text-slate-500 sm:flex-row">
         <p>© {new Date().getFullYear()} Tech Erics Real Estate Pvt Ltd. All rights reserved. RERA Registered.</p>
         <div className="flex gap-4">
           <a href="#" className="hover:text-slate-300">Facebook</a>

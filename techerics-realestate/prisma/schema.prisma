@@ -1,8 +1,8 @@
 // ============================================================
-// TECH ERICS REAL ESTATE PLATFORM — DATABASE SCHEMA
-// Research-backed design: normalized geography hierarchy,
-// versioned listings (price/status history), multi-language
-// content tables, and SEO-ready fields on every entity.
+// TECH ERICS REAL ESTATE PLATFORM — ENTERPRISE DATABASE SCHEMA
+// Supports 6-level location hierarchy (Country -> State -> City ->
+// Community -> SubCommunity -> Building), Developer profiles,
+// RERA registration, Location Scores (WalkScore), and Multi-lingual SEO.
 // ============================================================
 
 generator client {
@@ -14,16 +14,22 @@ datasource db {
 }
 
 // ---------------- GEOGRAPHY HIERARCHY ----------------
-// Country -> Region/State -> City -> Locality
-// Ye hierarchy footer ke "Popular Cities/Localities" links
-// aur programmatic SEO pages (city/locality) dono ke liye use hogi.
+// Country -> State -> City -> Community -> SubCommunity -> Building
 
 model Country {
-  id        String   @id @default(cuid())
-  code      String   @unique // ISO 3166-1 alpha-2, e.g. "IN", "AE", "US"
-  slug      String   @unique
-  regions   Region[]
-  createdAt DateTime @default(now())
+  id              String   @id @default(cuid())
+  code            String   @unique // ISO 3166-1 alpha-2, e.g. "IN", "AE", "US", "GB", "SA"
+  slug            String   @unique
+  name            String
+  nativeLanguage  String   @default("en")
+  defaultCurrency String   @default("USD")
+  currencySymbol  String   @default("$")
+  flag            String   @default("🌐")
+  regions         Region[]
+  states          State[]
+  developers      Developer[]
+  properties      Property[]
+  createdAt       DateTime @default(now())
 }
 
 model Region {
@@ -38,63 +44,141 @@ model Region {
   @@unique([countryId, slug])
 }
 
+model State {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String
+  countryId String
+  country   Country  @relation(fields: [countryId], references: [id])
+  cities    City[]
+
+  @@unique([countryId, slug])
+}
+
 model City {
   id            String   @id @default(cuid())
   name          String
   slug          String
-  regionId      String
-  region        Region   @relation(fields: [regionId], references: [id])
+  regionId      String?
+  region        Region?  @relation(fields: [regionId], references: [id])
+  stateId       String?
+  state         State?   @relation(fields: [stateId], references: [id])
   latitude      Float?
   longitude     Float?
   localities    Locality[]
+  communities   Community[]
   properties    Property[]
-  seoContent    String?  @db.Text // AI-generated unique city overview (avoids duplicate content)
+  seoContent    String?  @db.Text
   translations  CityTranslation[]
 
-  @@unique([regionId, slug])
+  @@unique([slug])
   @@index([slug])
 }
 
 model Locality {
-  id           String   @id @default(cuid())
-  name         String
-  slug         String
-  cityId       String
-  city         City     @relation(fields: [cityId], references: [id])
-  latitude     Float?
-  longitude    Float?
+  id              String   @id @default(cuid())
+  name            String
+  slug            String
+  cityId          String
+  city            City     @relation(fields: [cityId], references: [id])
+  latitude        Float?
+  longitude       Float?
   avgPricePerSqft Float?
-  properties   Property[]
-  seoContent   String?  @db.Text
-  translations LocalityTranslation[]
+  properties      Property[]
+  seoContent      String?  @db.Text
+  translations    LocalityTranslation[]
 
   @@unique([cityId, slug])
   @@index([slug])
 }
 
+model Community {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String
+  cityId          String
+  city            City     @relation(fields: [cityId], references: [id])
+  latitude        Float?
+  longitude       Float?
+  avgPricePerSqft Float?
+  subCommunities  SubCommunity[]
+  buildings       Building[]
+  properties      Property[]
+
+  @@unique([cityId, slug])
+  @@index([slug])
+}
+
+model SubCommunity {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String
+  communityId String
+  community   Community @relation(fields: [communityId], references: [id])
+  latitude    Float?
+  longitude   Float?
+  buildings   Building[]
+  properties  Property[]
+
+  @@unique([communityId, slug])
+}
+
+model Building {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String
+  communityId    String?
+  community      Community? @relation(fields: [communityId], references: [id])
+  subCommunityId String?
+  subCommunity   SubCommunity? @relation(fields: [subCommunityId], references: [id])
+  developerId    String?
+  developer      Developer? @relation(fields: [developerId], references: [id])
+  floors         Int?
+  yearBuilt      Int?
+  properties     Property[]
+
+  @@unique([slug])
+}
+
+model Developer {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  countryCode String   @default("AE")
+  countryId   String?
+  country     Country? @relation(fields: [countryId], references: [id])
+  reraNumber  String?
+  logoUrl     String?
+  bio         String?  @db.Text
+  projectCount Int     @default(0)
+  buildings   Building[]
+  properties  Property[]
+  createdAt   DateTime @default(now())
+}
+
 // ---------------- TRANSLATIONS (multi-language SEO content) ----------------
 
 model CityTranslation {
-  id        String   @id @default(cuid())
-  cityId    String
-  city      City     @relation(fields: [cityId], references: [id])
-  locale    String   // "en", "hi", "ar", ...
-  name      String
-  seoContent String? @db.Text
-  metaTitle String?
+  id              String   @id @default(cuid())
+  cityId          String
+  city            City     @relation(fields: [cityId], references: [id])
+  locale          String
+  name            String
+  seoContent      String?  @db.Text
+  metaTitle       String?
   metaDescription String?
 
   @@unique([cityId, locale])
 }
 
 model LocalityTranslation {
-  id         String   @id @default(cuid())
-  localityId String
-  locality   Locality @relation(fields: [localityId], references: [id])
-  locale     String
-  name       String
-  seoContent String?  @db.Text
-  metaTitle  String?
+  id              String   @id @default(cuid())
+  localityId      String
+  locality        Locality @relation(fields: [localityId], references: [id])
+  locale          String
+  name            String
+  seoContent      String?  @db.Text
+  metaTitle       String?
   metaDescription String?
 
   @@unique([localityId, locale])
@@ -111,13 +195,11 @@ model RegionTranslation {
 }
 
 // ---------------- CORE PROPERTY ENTITY ----------------
-// "Property" = the physical asset (durable).
-// "Listing" = the marketplace offer on that property (can change status/price over time).
-// Ye split RealtyAPI/industry best-practice hai — history/versioning ke liye zaroori.
 
 enum PropertyType {
   APARTMENT
   VILLA
+  TOWNHOUSE
   INDEPENDENT_HOUSE
   PLOT
   COMMERCIAL_OFFICE
@@ -142,11 +224,23 @@ enum ListingStatus {
   EXPIRED
 }
 
+enum CompletionStatus {
+  READY
+  OFF_PLAN
+  UNDER_CONSTRUCTION
+}
+
+enum FurnishedStatus {
+  FURNISHED
+  UNFURNISHED
+  SEMI_FURNISHED
+}
+
 model Property {
-  id            String       @id @default(cuid())
-  slug          String       @unique // e.g. "3bhk-apartment-bandra-west-mumbai-xyz123"
+  id            String           @id @default(cuid())
+  slug          String           @unique
   title         String
-  description   String       @db.Text
+  description   String           @db.Text
   propertyType  PropertyType
   bedrooms      Int?
   bathrooms     Int?
@@ -155,31 +249,48 @@ model Property {
   yearBuilt     Int?
   floors        Int?
 
+  completionStatus CompletionStatus @default(READY)
+  furnishedStatus  FurnishedStatus  @default(UNFURNISHED)
+  reraPermitNo     String?
+  walkScore        Int?             @default(85)
+  transitScore     Int?             @default(80)
+  schoolScore      Int?             @default(90)
+
   // Geography
-  cityId        String
-  city          City         @relation(fields: [cityId], references: [id])
-  localityId    String
-  locality      Locality     @relation(fields: [localityId], references: [id])
-  addressLine   String?
-  latitude      Float
-  longitude     Float
+  countryId      String?
+  country        Country?         @relation(fields: [countryId], references: [id])
+  cityId         String
+  city           City             @relation(fields: [cityId], references: [id])
+  localityId     String
+  locality       Locality         @relation(fields: [localityId], references: [id])
+  communityId    String?
+  community      Community?       @relation(fields: [communityId], references: [id])
+  subCommunityId String?
+  subCommunity   SubCommunity?    @relation(fields: [subCommunityId], references: [id])
+  buildingId     String?
+  building       Building?        @relation(fields: [buildingId], references: [id])
+  developerId    String?
+  developer      Developer?       @relation(fields: [developerId], references: [id])
+  addressLine    String?
+  latitude       Float
+  longitude      Float
 
   // Relations
   agentId       String?
-  agent         Agent?       @relation(fields: [agentId], references: [id])
+  agent         Agent?           @relation(fields: [agentId], references: [id])
   media         Media[]
   amenities     PropertyAmenity[]
   listings      Listing[]
   translations  PropertyTranslation[]
   leads         Lead[]
 
-  // SEO fields — every property page auto-generates these
+  // SEO fields
   metaTitle       String?
   metaDescription String?
-  schemaJsonLd    String?  @db.Text // cached generated JSON-LD (regenerated on update)
+  schemaJsonLd    String?        @db.Text
 
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 
   @@index([cityId, localityId])
   @@index([slug])
@@ -198,7 +309,6 @@ model PropertyTranslation {
   @@unique([propertyId, locale])
 }
 
-// Listing = versioned marketplace state (price/status history preserved, not overwritten)
 model Listing {
   id           String        @id @default(cuid())
   propertyId   String
@@ -215,14 +325,14 @@ model Listing {
 }
 
 model PriceHistory {
-  id        String   @id @default(cuid())
-  listingId String
-  listing   Listing  @relation(fields: [listingId], references: [id])
-  price     Decimal
+  id         String   @id @default(cuid())
+  listingId  String
+  listing    Listing  @relation(fields: [listingId], references: [id])
+  price      Decimal
   recordedAt DateTime @default(now())
 }
 
-// ---------------- MEDIA (photos, video, 360 tours, reels) ----------------
+// ---------------- MEDIA ----------------
 
 enum MediaType {
   PHOTO
@@ -238,7 +348,7 @@ model Media {
   property   Property  @relation(fields: [propertyId], references: [id])
   type       MediaType
   url        String
-  altText    String?   // auto-generated from property details for image SEO
+  altText    String?
   order      Int       @default(0)
   createdAt  DateTime  @default(now())
 
@@ -248,8 +358,8 @@ model Media {
 // ---------------- AMENITIES ----------------
 
 model Amenity {
-  id         String              @id @default(cuid())
-  name       String              @unique
+  id         String            @id @default(cuid())
+  name       String            @unique
   icon       String?
   properties PropertyAmenity[]
 }
@@ -279,16 +389,16 @@ model Agent {
 }
 
 model Review {
-  id        String   @id @default(cuid())
-  agentId   String
-  agent     Agent    @relation(fields: [agentId], references: [id])
-  rating    Int      // 1-5
-  comment   String?  @db.Text
+  id         String   @id @default(cuid())
+  agentId    String
+  agent      Agent    @relation(fields: [agentId], references: [id])
+  rating     Int
+  comment    String?  @db.Text
   authorName String
-  createdAt DateTime @default(now())
+  createdAt  DateTime @default(now())
 }
 
-// ---------------- LEADS (dual capture: DB + WhatsApp) ----------------
+// ---------------- LEADS ----------------
 
 enum LeadSource {
   WEBSITE_FORM
@@ -298,16 +408,16 @@ enum LeadSource {
 }
 
 model Lead {
-  id          String     @id @default(cuid())
-  propertyId  String?
-  property    Property?  @relation(fields: [propertyId], references: [id])
-  name        String
-  phone       String
-  email       String?
-  message     String?    @db.Text
-  source      LeadSource @default(WEBSITE_FORM)
-  whatsappSent Boolean   @default(false)
-  createdAt   DateTime   @default(now())
+  id           String     @id @default(cuid())
+  propertyId   String?
+  property     Property?  @relation(fields: [propertyId], references: [id])
+  name         String
+  phone        String
+  email        String?
+  message      String?    @db.Text
+  source       LeadSource @default(WEBSITE_FORM)
+  whatsappSent Boolean    @default(false)
+  createdAt    DateTime   @default(now())
 
   @@index([createdAt])
 }
@@ -323,7 +433,7 @@ enum UserRole {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
-  password  String   // bcrypt hashed
+  password  String
   name      String
   role      UserRole @default(EDITOR)
   createdAt DateTime @default(now())
