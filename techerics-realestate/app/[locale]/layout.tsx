@@ -7,6 +7,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { routing } from "@/i18n/routing";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import CodeProtection from "@/components/CodeProtection";
 import { CountryProvider } from "@/lib/country-context";
 import "../globals.css";
 
@@ -49,6 +50,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"}>
       <body className="min-h-screen bg-slate-950 font-sans text-slate-100 antialiased">
+        <CodeProtection />
         <NextIntlClientProvider>
           <CountryProvider>
             <Header />

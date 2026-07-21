@@ -3,6 +3,14 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Prevent exposing original TypeScript source code in browser DevTools
+  productionBrowserSourceMaps: false,
+  
+  // Strip console.log statements in production builds
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production",
+  },
+
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
