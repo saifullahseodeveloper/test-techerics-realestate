@@ -1,4 +1,6 @@
-import PropertyPage, { generateMetadata, generateStaticParams, revalidate } from "../../property/[slug]/page";
+import PropertyPage, { generateMetadata } from "../../property/[slug]/page";
 
-export { generateMetadata, generateStaticParams, revalidate };
+export const revalidate = 60;
+
+export { generateMetadata };
 export default PropertyPage;
