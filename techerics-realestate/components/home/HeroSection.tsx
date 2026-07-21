@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCountry } from "@/lib/country-context";
+import { GLOBAL_CITIES } from "@/lib/global-locations";
 
 export default function HeroSection() {
   const router = useRouter();
@@ -12,10 +13,14 @@ export default function HeroSection() {
   const [propertyType, setPropertyType] = useState("ALL");
   const [budget, setBudget] = useState("ALL");
 
+  const countryCities = GLOBAL_CITIES.filter(
+    (c) => c.countryCode.toLowerCase() === market.code.toLowerCase() || c.countryName.toLowerCase() === market.countryName.toLowerCase()
+  );
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
-    params.set("country", market.countryCode);
+    params.set("country", market.code);
     params.set("purpose", activeTab === "RENT" ? "RENT" : "SALE");
     if (location) params.set("q", location);
     if (propertyType !== "ALL") params.set("type", propertyType);
@@ -28,7 +33,7 @@ export default function HeroSection() {
       {/* Dynamic Background Image per selected Country */}
       <div className="absolute inset-0 z-0">
         <img
-          src={market.heroBgImage}
+          src={market.heroImage}
           alt={market.countryName}
           className="h-full w-full object-cover object-center opacity-40 filter brightness-90 saturate-110 transition-opacity duration-700"
         />
@@ -39,19 +44,16 @@ export default function HeroSection() {
         {/* Country Badge */}
         <div className="inline-flex items-center gap-2 rounded-full border border-teal-500/30 bg-teal-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-teal-300 backdrop-blur-md">
           <span className="text-base">{market.flag}</span>
-          {market.heroTag}
+          Official {market.countryName} Real Estate Portal
         </div>
 
         {/* Headline */}
         <h1 className="mt-6 font-serif text-4xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl leading-tight">
-          {market.heroHeadline} <br className="hidden sm:inline" />
-          <span className="bg-gradient-to-r from-white via-slate-200 to-amber-200 bg-clip-text text-transparent">
-            {market.heroHighlight}
-          </span>
+          {market.heroHeadline}
         </h1>
 
         <p className="mx-auto mt-4 max-w-2xl text-base text-slate-300 sm:text-lg">
-          {market.heroSubtitle}
+          {market.heroSubheadline}
         </p>
 
         {/* Multi-Tab Glassmorphism Search Box */}
@@ -90,7 +92,7 @@ export default function HeroSection() {
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder={`Search in ${market.topCities[0]?.name || market.countryName}...`}
+                placeholder={market.searchPlaceholder}
                 className="w-full rounded-xl border border-slate-700/80 bg-slate-950/70 px-3.5 py-3 text-sm text-white placeholder:text-slate-500 focus:border-teal-400 focus:outline-none"
               />
             </div>
@@ -142,14 +144,14 @@ export default function HeroSection() {
         {/* Popular Tags */}
         <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-400">
           <span className="font-semibold text-slate-300">Top Locations in {market.countryName}:</span>
-          {market.topCities.map((city, idx) => (
+          {countryCities.map((city, idx) => (
             <button
               key={idx}
               type="button"
-              onClick={() => router.push(`/${city.slug}`)}
+              onClick={() => router.push(`/${market.slug}/${city.slug}`)}
               className="rounded-full border border-slate-800 bg-slate-900/60 px-3 py-1 hover:border-teal-500/40 hover:text-teal-300"
             >
-              📍 {city.name} ({city.count})
+              📍 {city.name}
             </button>
           ))}
         </div>
