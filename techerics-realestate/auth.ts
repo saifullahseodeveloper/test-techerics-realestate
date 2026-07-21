@@ -10,6 +10,8 @@ import { authRatelimit } from "@/lib/rate-limit";
 // a DB round-trip on every request, which matters for a high-traffic
 // SEO-first site where most pages are public/anonymous.
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? "techerics-fallback-secret-key-32-chars-long!",
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: { signIn: "/admin/login", error: "/admin/login" },
   providers: [
