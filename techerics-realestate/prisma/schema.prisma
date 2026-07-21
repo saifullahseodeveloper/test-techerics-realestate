@@ -283,6 +283,7 @@ model Property {
   listings      Listing[]
   translations  PropertyTranslation[]
   leads         Lead[]
+  savedProperties SavedProperty[]
 
   // SEO fields
   metaTitle       String?
