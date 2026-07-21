@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { leadsRatelimit, getClientIp } from "@/lib/rate-limit";
+import { sanitizeInput, isValidPhone } from "@/lib/security";
 
 // Meta's official WhatsApp Cloud API — chosen over third-party wrappers
 // (research confirms unofficial/web-scraping libraries get numbers banned).
@@ -57,10 +58,21 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { propertyId, name, phone, message } = body;
+  const rawName = body.name;
+  const rawPhone = body.phone;
+  const rawMessage = body.message;
+  const propertyId = body.propertyId;
+
+  const name = sanitizeInput(rawName);
+  const phone = sanitizeInput(rawPhone);
+  const message = sanitizeInput(rawMessage).substring(0, 1000);
 
   if (!name || !phone) {
-    return NextResponse.json({ error: "Name and phone required" }, { status: 400 });
+    return NextResponse.json({ error: "Valid name and phone required" }, { status: 400 });
+  }
+
+  if (!isValidPhone(phone)) {
+    return NextResponse.json({ error: "Invalid phone number format" }, { status: 400 });
   }
 
   const property = propertyId
