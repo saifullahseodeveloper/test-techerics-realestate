@@ -2,80 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-
-type ListingItem = {
-  id: string;
-  title: string;
-  location: string;
-  price: string;
-  type: string;
-  bhk: string;
-  bath: string;
-  area: string;
-  image: string;
-  tag: string;
-  purpose: "FOR SALE" | "FOR RENT";
-};
-
-const SAMPLE_LISTINGS: ListingItem[] = [
-  {
-    id: "prop-1",
-    title: "Sea-Facing Modern Villa with Private Garden",
-    location: "Bandra West, Mumbai",
-    price: "₹ 7.50 Cr",
-    type: "VILLA",
-    bhk: "4 BHK",
-    bath: "4 Bath",
-    area: "3,400 sqft",
-    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
-    tag: "FEATURED VILLA",
-    purpose: "FOR SALE",
-  },
-  {
-    id: "prop-2",
-    title: "Luxury Duplex Penthouse in Golf Course Road",
-    location: "DLF Phase 5, Gurgaon",
-    price: "₹ 5.20 Cr",
-    type: "APARTMENT",
-    bhk: "3 BHK",
-    bath: "3 Bath",
-    area: "2,600 sqft",
-    image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
-    tag: "SUPER LUXURY",
-    purpose: "FOR SALE",
-  },
-  {
-    id: "prop-3",
-    title: "Grade-A Commercial Office Space in Financial District",
-    location: "BKC, Mumbai",
-    price: "₹ 2.80 Lakh / mo",
-    type: "COMMERCIAL",
-    bhk: "Furnished",
-    bath: "2 Restrooms",
-    area: "1,850 sqft",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80",
-    tag: "COMMERCIAL HUB",
-    purpose: "FOR RENT",
-  },
-  {
-    id: "prop-4",
-    title: "Gated Community Contemporary Family Residence",
-    location: "Koregaon Park, Pune",
-    price: "₹ 3.15 Cr",
-    type: "VILLA",
-    bhk: "3 BHK",
-    bath: "3 Bath",
-    area: "2,200 sqft",
-    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
-    tag: "READY TO MOVE",
-    purpose: "FOR SALE",
-  },
-];
+import { useCountry } from "@/lib/country-context";
 
 export default function PremiumProperties() {
+  const { market } = useCountry();
   const [activeTab, setActiveTab] = useState<"ALL" | "VILLA" | "APARTMENT" | "COMMERCIAL">("ALL");
 
-  const filteredListings = SAMPLE_LISTINGS.filter(
+  const filteredListings = market.sampleProperties.filter(
     (item) => activeTab === "ALL" || item.type === activeTab
   );
 
@@ -84,17 +17,17 @@ export default function PremiumProperties() {
       <div className="mx-auto max-w-6xl">
         <div className="text-center">
           <span className="text-xs font-bold uppercase tracking-widest text-teal-400">
-            Exclusive Residences
+            {market.flag} Exclusive {market.countryName} Properties
           </span>
           <h2 className="mt-1 font-serif text-2xl font-bold text-white sm:text-3xl">
-            Premium Properties
+            Premium Residences in {market.countryName}
           </h2>
           <p className="mt-1 text-sm text-slate-400">
             Verified luxury apartments, villas, and commercial spaces across prime localities.
           </p>
         </div>
 
-        {/* Category Tabs matching section 5 of reference image */}
+        {/* Category Tabs */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
           {[
             { id: "ALL", label: "All Properties" },
@@ -116,14 +49,13 @@ export default function PremiumProperties() {
           ))}
         </div>
 
-        {/* Property Grid matching section 5 of reference image */}
+        {/* Dynamic Property Grid */}
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
           {filteredListings.map((prop) => (
             <div
               key={prop.id}
               className="group overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-lg transition-all duration-300 hover:border-teal-500/50 hover:shadow-xl sm:flex"
             >
-              {/* Left Image */}
               <div className="relative aspect-[16/10] w-full overflow-hidden sm:w-1/2 sm:aspect-auto">
                 <img
                   src={prop.image}
@@ -135,7 +67,6 @@ export default function PremiumProperties() {
                 </span>
               </div>
 
-              {/* Right Content */}
               <div className="flex flex-1 flex-col justify-between p-5">
                 <div>
                   <span className="text-[11px] font-semibold text-teal-400 uppercase tracking-wider">
@@ -155,7 +86,7 @@ export default function PremiumProperties() {
 
                 <div className="mt-5 pt-3 border-t border-slate-800 flex items-center justify-between">
                   <div>
-                    <span className="block text-[10px] uppercase tracking-wider text-slate-500">Price</span>
+                    <span className="block text-[10px] uppercase tracking-wider text-slate-500">Price ({market.currency})</span>
                     <span className="text-lg font-bold text-teal-300">{prop.price}</span>
                   </div>
 

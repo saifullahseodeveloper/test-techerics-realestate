@@ -3,32 +3,44 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GLOBAL_COUNTRIES, GLOBAL_CITIES, CountryData, CityData } from "@/lib/global-locations";
+import { useCountry } from "@/lib/country-context";
 
 type Props = {
-  selectedCountry?: string;
   selectedCity?: string;
   onSelect?: (country: CountryData, city?: CityData) => void;
 };
 
-export default function GlobalLocationSelector({ selectedCountry, selectedCity, onSelect }: Props) {
+export default function GlobalLocationSelector({ selectedCity, onSelect }: Props) {
   const router = useRouter();
+  const { countryCode, setCountryCode, market } = useCountry();
   const [isOpen, setIsOpen] = useState(false);
-  const [activeCountry, setActiveCountry] = useState<CountryData>(
-    GLOBAL_COUNTRIES.find((c) => c.code === selectedCountry) || GLOBAL_COUNTRIES[0]
-  );
   const [searchQuery, setSearchQuery] = useState("");
 
+  const activeCountryData =
+    GLOBAL_COUNTRIES.find((c) => c.code === countryCode) || GLOBAL_COUNTRIES[0];
+
   const filteredCities = GLOBAL_CITIES.filter((city) => {
-    const matchesCountry = city.countryCode === activeCountry.code;
+    const matchesCountry = city.countryCode === countryCode;
     const matchesSearch =
       city.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       city.popularLocalities.some((l) => l.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesCountry && matchesSearch;
   });
 
+  const handleCountryClick = (c: CountryData) => {
+    setCountryCode(c.code);
+    if (c.defaultLocale === "ar") {
+      router.push(`/ar`);
+    } else if (c.defaultLocale === "hi") {
+      router.push(`/hi`);
+    } else {
+      router.push(`/en`);
+    }
+  };
+
   const handleCityClick = (city: CityData) => {
     if (onSelect) {
-      onSelect(activeCountry, city);
+      onSelect(activeCountryData, city);
     } else {
       router.push(`/${city.slug}`);
     }
@@ -43,8 +55,10 @@ export default function GlobalLocationSelector({ selectedCountry, selectedCity, 
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/90 px-3.5 py-2 text-xs font-semibold text-white shadow-md backdrop-blur transition hover:border-teal-400 hover:bg-slate-800"
       >
-        <span>{activeCountry.flag}</span>
-        <span className="truncate max-w-[120px]">{selectedCity || activeCountry.name}</span>
+        <span>{activeCountryData.flag}</span>
+        <span className="truncate max-w-[120px]">
+          {selectedCity || activeCountryData.name}
+        </span>
         <span className="text-slate-400 text-[10px]">▼</span>
       </button>
 
@@ -53,7 +67,7 @@ export default function GlobalLocationSelector({ selectedCountry, selectedCity, 
         <div className="absolute left-0 top-full z-50 mt-2 w-80 sm:w-96 rounded-2xl border border-slate-800 bg-slate-950 p-4 shadow-2xl backdrop-blur-xl">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-teal-400">
-              Select Global Location
+              Select Country & Market
             </h4>
             <button
               onClick={() => setIsOpen(false)}
@@ -69,13 +83,10 @@ export default function GlobalLocationSelector({ selectedCountry, selectedCity, 
               <button
                 key={c.code}
                 type="button"
-                onClick={() => {
-                  setActiveCountry(c);
-                  setSearchQuery("");
-                }}
+                onClick={() => handleCountryClick(c)}
                 className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition ${
-                  activeCountry.code === c.code
-                    ? "bg-teal-500 text-slate-950 font-bold"
+                  countryCode === c.code
+                    ? "bg-teal-500 text-slate-950 font-bold shadow"
                     : "bg-slate-900 text-slate-300 hover:bg-slate-800"
                 }`}
               >
@@ -91,7 +102,7 @@ export default function GlobalLocationSelector({ selectedCountry, selectedCity, 
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={`Search cities in ${activeCountry.name}...`}
+              placeholder={`Search cities in ${market.countryName}...`}
               className="w-full rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-xs text-white placeholder:text-slate-500 focus:border-teal-400 focus:outline-none"
             />
           </div>
@@ -115,7 +126,7 @@ export default function GlobalLocationSelector({ selectedCountry, selectedCity, 
             ))}
             {!filteredCities.length && (
               <p className="py-4 text-center text-xs text-slate-500">
-                No cities found for this search.
+                No cities found for {market.countryName}.
               </p>
             )}
           </div>

@@ -2,80 +2,28 @@
 
 import { useState } from "react";
 import Link from "next/link";
-
-type ProjectItem = {
-  id: string;
-  title: string;
-  location: string;
-  developer: string;
-  price: string;
-  status: string;
-  bhk: string;
-  sqft: string;
-  image: string;
-  badge: string;
-};
-
-const SAMPLE_PROJECTS: ProjectItem[] = [
-  {
-    id: "proj-1",
-    title: "The Grand Horizon Luxury Estates",
-    location: "Bandra West, Mumbai",
-    developer: "Oberoi Realty",
-    price: "₹ 4.85 Cr Onwards",
-    status: "FOR SALE",
-    bhk: "3 & 4 BHK",
-    sqft: "1,850 - 2,900 sqft",
-    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
-    badge: "HOT LAUNCH",
-  },
-  {
-    id: "proj-2",
-    title: "Palais Royale Skyline Penthouses",
-    location: "Worli, Mumbai",
-    developer: "LODHA Group",
-    price: "₹ 8.50 Cr Onwards",
-    status: "FOR SALE",
-    bhk: "4 & 5 BHK",
-    sqft: "3,200 - 5,100 sqft",
-    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80",
-    badge: "EXCLUSIVE",
-  },
-  {
-    id: "proj-3",
-    title: "Verdant Greens Golf Villas",
-    location: "Golf Course Road, Gurgaon",
-    developer: "DLF Limited",
-    price: "₹ 6.20 Cr Onwards",
-    status: "FOR SALE",
-    bhk: "4 BHK Villa",
-    sqft: "4,100 sqft",
-    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
-    badge: "READY TO MOVE",
-  },
-];
+import { useCountry } from "@/lib/country-context";
 
 export default function FeaturedProjects() {
+  const { market } = useCountry();
   const [filter, setFilter] = useState<"ALL" | "SALE" | "RENT">("ALL");
 
   return (
     <section className="bg-slate-900 px-4 py-16">
       <div className="mx-auto max-w-6xl">
-        {/* Section Header */}
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <span className="text-xs font-bold uppercase tracking-widest text-teal-400">
-              Top New Launches
+              {market.flag} Top Launches in {market.countryName}
             </span>
             <h2 className="mt-1 font-serif text-2xl font-bold text-white sm:text-3xl">
               Featured Real Estate Developments
             </h2>
             <p className="mt-1 text-sm text-slate-400">
-              Discover premier gated communities and sea-facing architectural marvels.
+              Premier developments by {market.topDevelopers[0]?.name || "top builders"} & leading master developers.
             </p>
           </div>
 
-          {/* Filter Pills */}
           <div className="flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-950/80 p-1 text-xs">
             {(["ALL", "SALE", "RENT"] as const).map((mode) => (
               <button
@@ -93,14 +41,13 @@ export default function FeaturedProjects() {
           </div>
         </div>
 
-        {/* Project Cards Grid matching reference image card layout */}
+        {/* Dynamic Country Projects Grid */}
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {SAMPLE_PROJECTS.map((project) => (
+          {market.sampleProjects.map((project) => (
             <div
               key={project.id}
               className="group overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-950 transition-all duration-300 hover:-translate-y-1 hover:border-teal-500/50 hover:shadow-xl hover:shadow-teal-500/10"
             >
-              {/* Image & Badge */}
               <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-900">
                 <img
                   src={project.image}
@@ -108,19 +55,16 @@ export default function FeaturedProjects() {
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
-                
-                {/* Badge top-left */}
+
                 <span className="absolute top-3 left-3 rounded-md bg-rose-500/90 px-2.5 py-1 text-[10px] font-bold tracking-wider text-white shadow-md backdrop-blur">
                   {project.badge}
                 </span>
 
-                {/* Developer Tag top-right */}
                 <span className="absolute top-3 right-3 rounded-md bg-slate-900/90 px-2.5 py-1 text-[11px] font-medium text-slate-200 backdrop-blur border border-slate-700">
                   {project.developer}
                 </span>
               </div>
 
-              {/* Card Body */}
               <div className="p-5">
                 <div className="flex items-center justify-between text-xs text-teal-400">
                   <span>📍 {project.location}</span>
@@ -136,7 +80,6 @@ export default function FeaturedProjects() {
                   <span>📐 {project.sqft}</span>
                 </div>
 
-                {/* Price and CTA */}
                 <div className="mt-4 flex items-center justify-between">
                   <div>
                     <span className="block text-[11px] uppercase tracking-wider text-slate-500">Starting From</span>

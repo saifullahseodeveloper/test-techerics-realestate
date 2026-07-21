@@ -7,6 +7,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { routing } from "@/i18n/routing";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { CountryProvider } from "@/lib/country-context";
 import "../globals.css";
 
 export function generateStaticParams() {
@@ -24,11 +25,8 @@ export async function generateMetadata({
     alternates: {
       languages: Object.fromEntries(routing.locales.map((l) => [l, `/${l}`])),
     },
-    title: { default: "Tech Erics — Real Estate", template: "%s | Tech Erics" },
+    title: { default: "Tech Erics — Global Real Estate", template: "%s | Tech Erics" },
     other: locale === "ar" ? { dir: "rtl" } : {},
-    // Google Search Console + Bing verification — paste actual codes when
-    // registering the property (Search Console needed to submit sitemap.xml
-    // and monitor indexing/Core Web Vitals for real users)
     verification: {
       google: process.env.NEXT_PUBLIC_GSC_VERIFICATION,
       other: { "msvalidate.01": process.env.NEXT_PUBLIC_BING_VERIFICATION ?? "" },
@@ -46,21 +44,18 @@ export default async function LocaleLayout({
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
 
-  // Required so translations work correctly in Server Components and
-  // static rendering is enabled (research flagged: skipping this
-  // silently forces the whole route to dynamic rendering).
   setRequestLocale(locale);
 
   return (
     <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"}>
-      <body className="min-h-screen bg-navy-950 font-sans text-slate-100 antialiased">
+      <body className="min-h-screen bg-slate-950 font-sans text-slate-100 antialiased">
         <NextIntlClientProvider>
-          <Header />
-          {children}
-          <Footer />
+          <CountryProvider>
+            <Header />
+            {children}
+            <Footer />
+          </CountryProvider>
         </NextIntlClientProvider>
-        {/* Real-user Core Web Vitals + traffic monitoring — feeds back into
-            the SEO loop (LCP/INP/CLS regressions get caught before they hurt rankings) */}
         <Analytics />
         <SpeedInsights />
       </body>
