@@ -68,6 +68,47 @@ async function main() {
     },
   });
 
+  // 3) Blog Categories & Sample Posts
+  const catMarket = await prisma.blogCategory.upsert({
+    where: { slug: "market-trends" },
+    update: {},
+    create: { name: "Market Trends", slug: "market-trends" }
+  });
+
+  const catGuide = await prisma.blogCategory.upsert({
+    where: { slug: "area-guides" },
+    update: {},
+    create: { name: "Area Guides", slug: "area-guides" }
+  });
+
+  await prisma.blogPost.upsert({
+    where: { slug: "dubai-real-estate-market-report-2026" },
+    update: {},
+    create: {
+      title: "Dubai Real Estate Market Report 2026",
+      slug: "dubai-real-estate-market-report-2026",
+      content: "The Dubai real estate market continues to surge in 2026, driven by high demand for luxury villas and waterfront properties. Investors are seeing a 14% YoY appreciation...",
+      authorName: "Sarah Al Maktoum",
+      categoryId: catMarket.id,
+      published: true,
+      coverImage: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=80"
+    }
+  });
+
+  await prisma.blogPost.upsert({
+    where: { slug: "ultimate-guide-to-buying-property-in-mumbai" },
+    update: {},
+    create: {
+      title: "The Ultimate Guide to Buying Property in Mumbai",
+      slug: "ultimate-guide-to-buying-property-in-mumbai",
+      content: "Mumbai remains one of the most lucrative real estate markets in India. In this guide, we break down top localities like Bandra and South Mumbai for prospective buyers...",
+      authorName: "Rahul Sharma",
+      categoryId: catGuide.id,
+      published: true,
+      coverImage: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=800&q=80"
+    }
+  });
+
   console.log(`Global Seed complete! Super Admin: ${adminEmail}`);
 }
 

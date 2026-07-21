@@ -428,6 +428,7 @@ enum UserRole {
   SUPER_ADMIN
   EDITOR
   AGENT
+  USER
 }
 
 model User {
@@ -435,6 +436,57 @@ model User {
   email     String   @unique
   password  String
   name      String
-  role      UserRole @default(EDITOR)
+  role      UserRole @default(USER)
+  savedProperties SavedProperty[]
   createdAt DateTime @default(now())
+}
+
+// ---------------- USER SAVED PROPERTIES ----------------
+
+model SavedProperty {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, propertyId])
+}
+
+// ---------------- BLOGS & AREA GUIDES ----------------
+
+model BlogCategory {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  posts       BlogPost[]
+  createdAt   DateTime   @default(now())
+}
+
+model BlogPost {
+  id          String       @id @default(cuid())
+  title       String
+  slug        String       @unique
+  content     String       @db.Text
+  coverImage  String?
+  authorName  String
+  readTime    Int          @default(5)
+  published   Boolean      @default(false)
+  categoryId  String?
+  category    BlogCategory? @relation(fields: [categoryId], references: [id])
+  translations BlogPostTranslation[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model BlogPostTranslation {
+  id          String   @id @default(cuid())
+  postId      String
+  post        BlogPost @relation(fields: [postId], references: [id])
+  locale      String
+  title       String
+  content     String   @db.Text
+
+  @@unique([postId, locale])
 }
