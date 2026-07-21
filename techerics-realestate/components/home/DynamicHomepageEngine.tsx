@@ -1,5 +1,7 @@
 "use client";
 
+import { useTheme } from "@/lib/theme-engine/theme-context";
+import { SectionType } from "@/lib/theme-engine/tokens";
 import HeroSection from "@/components/home/HeroSection";
 import HeroAppleMinimal from "@/components/home/variants/HeroAppleMinimal";
 import HeroDubaiVideo from "@/components/home/variants/HeroDubaiVideo";
