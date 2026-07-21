@@ -2,7 +2,6 @@ import { Metadata } from "next";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { format } from "date-fns";
 
 export const metadata: Metadata = {
   title: "Lead Management CRM | Tech Erics Admin",
@@ -52,7 +51,7 @@ export default async function AdminLeadsPage() {
               {leads.map((lead) => (
                 <tr key={lead.id} className="hover:bg-slate-800/50 transition">
                   <td className="whitespace-nowrap px-6 py-4 text-xs">
-                    {format(lead.createdAt, "MMM d, yyyy HH:mm")}
+                    {new Date(lead.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                   </td>
                   <td className="px-6 py-4">
                     <div className="font-bold text-white">{lead.name}</div>

@@ -2,7 +2,6 @@ import { Metadata } from "next";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { format } from "date-fns";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -70,7 +69,7 @@ export default async function AdminBlogsPage() {
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-xs">
-                    {format(blog.createdAt, "MMM d, yyyy")}
+                    {new Date(blog.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <button className="text-teal-400 hover:text-teal-300 font-semibold text-xs transition">

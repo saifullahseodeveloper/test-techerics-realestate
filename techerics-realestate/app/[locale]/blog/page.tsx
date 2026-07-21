@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { useTranslations } from "next-intl";
-import { unstable_setRequestLocale } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 
 export const metadata: Metadata = {
   title: "Real Estate Market Trends & Area Guides | Tech Erics",
@@ -13,7 +13,7 @@ type Props = { params: Promise<{ locale: string }> };
 
 export default async function BlogIndexPage({ params }: Props) {
   const { locale } = await params;
-  unstable_setRequestLocale(locale);
+  setRequestLocale(locale);
 
   // Fetch blogs with their category
   const blogs = await prisma.blogPost.findMany({

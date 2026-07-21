@@ -2,8 +2,7 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { unstable_setRequestLocale } from "next-intl/server";
-import { format } from "date-fns";
+import { setRequestLocale } from "next-intl/server";
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
@@ -28,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
   const { locale, slug } = await params;
-  unstable_setRequestLocale(locale);
+  setRequestLocale(locale);
 
   const post = await prisma.blogPost.findUnique({
     where: { slug },
@@ -36,6 +35,12 @@ export default async function BlogPostPage({ params }: Props) {
   });
 
   if (!post || !post.published) return notFound();
+
+  const formattedDate = new Date(post.createdAt).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 
   return (
     <main className="min-h-screen bg-slate-950 pb-20 pt-8 text-slate-100">
@@ -55,7 +60,7 @@ export default async function BlogPostPage({ params }: Props) {
           <div className="mt-6 flex items-center justify-center gap-4 text-xs font-medium text-slate-400">
             <span>By <strong className="text-slate-200">{post.authorName}</strong></span>
             <span>•</span>
-            <span>{format(post.createdAt, "MMMM d, yyyy")}</span>
+            <span>{formattedDate}</span>
             <span>•</span>
             <span className="text-teal-400">{post.readTime} min read</span>
           </div>
