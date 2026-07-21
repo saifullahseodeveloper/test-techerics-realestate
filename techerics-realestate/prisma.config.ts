@@ -1,17 +1,19 @@
 import "dotenv/config";
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
 
-// Prisma 7 moved the datasource URL out of schema.prisma into this config
-// file — schema.prisma's `url = env("DATABASE_URL")` alone is no longer
-// enough for CLI commands like `migrate deploy` (this file didn't exist
-// when the project was first scaffolded; Prisma 7 released after that
-// and made this file mandatory).
+// Neon DB compatibility: Prisma migrations require a direct (unpooled) connection
+// because PgBouncer connection pooling blocks postgres advisory locks (error P1002).
+// We prioritize DIRECT_URL, or automatically strip '-pooler' from DATABASE_URL.
+const rawUrl = process.env.DIRECT_URL || process.env.DATABASE_URL || "";
+const directDbUrl = rawUrl.replace("-pooler.", ".");
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
   },
   datasource: {
-    url: env("DATABASE_URL"),
+    url: directDbUrl,
   },
 });
+
