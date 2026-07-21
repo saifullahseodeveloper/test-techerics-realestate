@@ -32,9 +32,24 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Whenever activeTheme changes, update body attributes & localStorage/cookies
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.setAttribute("data-theme", activeTheme.id);
+      if (activeTheme.id.includes("light") || activeTheme.id.includes("brutalism") || activeTheme.id.includes("scandinavian")) {
+        document.documentElement.classList.remove("dark");
+        document.documentElement.classList.add("light");
+      } else {
+        document.documentElement.classList.remove("light");
+        document.documentElement.classList.add("dark");
+      }
+    }
+  }, [activeTheme]);
+
   const setThemeId = (themeId: string) => {
     if (THEME_PRESETS[themeId]) {
-      setActiveTheme(THEME_PRESETS[themeId]);
+      const theme = THEME_PRESETS[themeId];
+      setActiveTheme(theme);
       localStorage.setItem("selected_theme_id", themeId);
       document.cookie = `selected_theme_id=${themeId}; path=/; max-age=31536000`;
     }
@@ -69,7 +84,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         importThemeJson,
       }}
     >
-      <div className={`${activeTheme.styles.bg} ${activeTheme.styles.text} transition-colors duration-500 min-h-screen`}>
+      <div
+        id="theme-root-container"
+        className={`${activeTheme.styles.bg} ${activeTheme.styles.text} transition-colors duration-500 min-h-screen`}
+      >
         {children}
       </div>
     </ThemeContext.Provider>
