@@ -1,8 +1,9 @@
 "use client";
 
-import { useTheme } from "@/lib/theme-engine/theme-context";
-import { SectionType } from "@/lib/theme-engine/tokens";
 import HeroSection from "@/components/home/HeroSection";
+import HeroAppleMinimal from "@/components/home/variants/HeroAppleMinimal";
+import HeroDubaiVideo from "@/components/home/variants/HeroDubaiVideo";
+import HeroNeoBrutalist from "@/components/home/variants/HeroNeoBrutalist";
 import ExploreCities from "@/components/home/ExploreCities";
 import FeaturedProjects from "@/components/home/FeaturedProjects";
 import PremiumProperties from "@/components/home/PremiumProperties";
@@ -35,8 +36,13 @@ export default function DynamicHomepageEngine() {
     <div className="space-y-0">
       {sectionOrder.map((sectionKey) => {
         switch (sectionKey) {
-          case "HERO":
-            return <HeroSection key="hero" />;
+          case "HERO": {
+            const variant = activeTheme.layoutSchema?.heroVariant;
+            if (variant === "APPLE_MINIMAL_LIGHT") return <HeroAppleMinimal key="hero-apple" />;
+            if (variant === "DUBAI_VIDEO_LUXURY") return <HeroDubaiVideo key="hero-dubai" />;
+            if (variant === "NEO_BRUTALIST") return <HeroNeoBrutalist key="hero-brutalist" />;
+            return <HeroSection key="hero-default" />;
+          }
           case "CITIES":
             return <ExploreCities key="cities" />;
           case "FEATURED_PROJECTS":
