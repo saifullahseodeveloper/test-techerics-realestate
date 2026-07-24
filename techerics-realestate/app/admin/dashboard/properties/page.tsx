@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 
+import SeedGlobalButton from "@/components/SeedGlobalButton";
+
 export const metadata: Metadata = {
   title: "Property Management | Tech Erics Admin",
 };
@@ -41,12 +43,15 @@ export default async function AdminPropertiesPage() {
             </p>
           </div>
 
-          <Link
-            href="/admin/dashboard/new"
-            className="rounded-xl bg-gradient-to-r from-teal-400 to-emerald-400 px-5 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-teal-500/20 hover:opacity-90 transition"
-          >
-            + Add New Property
-          </Link>
+          <div className="flex items-center gap-3">
+            <SeedGlobalButton />
+            <Link
+              href="/admin/dashboard/new"
+              className="rounded-xl bg-gradient-to-r from-teal-400 to-emerald-400 px-5 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-teal-500/20 hover:opacity-90 transition"
+            >
+              + Add New Property
+            </Link>
+          </div>
         </div>
       </div>
 
