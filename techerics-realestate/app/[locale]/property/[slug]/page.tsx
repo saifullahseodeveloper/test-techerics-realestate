@@ -154,6 +154,12 @@ export default async function PropertyPage({ params }: Props) {
     ],
   };
 
+  const isDemoListing =
+    title.startsWith("[DEMO]") ||
+    title.toLowerCase().includes("dummy") ||
+    title.toLowerCase().includes("sample") ||
+    desc.toLowerCase().includes("lorem");
+
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-8 text-slate-100">
       <script
@@ -166,6 +172,22 @@ export default async function PropertyPage({ params }: Props) {
       />
 
       <div className="mx-auto max-w-6xl">
+        {/* Demo / Sample Listing Alert Banner */}
+        {isDemoListing && (
+          <div className="mb-6 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-xs font-bold text-amber-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg shadow-amber-500/5">
+            <div className="flex items-center gap-3">
+              <span className="text-xl">⚠️</span>
+              <div>
+                <span className="block font-extrabold uppercase tracking-wider text-amber-200">DEMO / SAMPLE PROPERTY LISTING</span>
+                <span className="block text-[11px] font-normal text-amber-300/90">This is a demonstration listing created for platform preview. All specifications, photos, and prices are sample data.</span>
+              </div>
+            </div>
+            <span className="rounded-full bg-amber-500/20 px-3 py-1 text-[10px] font-extrabold border border-amber-500/40 uppercase shrink-0">
+              SAMPLE DATA
+            </span>
+          </div>
+        )}
+
         {/* Clickable Breadcrumb Navigation */}
         <nav aria-label="breadcrumb" className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 flex-wrap">
           <Link href="/en" className="hover:text-teal-400 transition">Home</Link>
