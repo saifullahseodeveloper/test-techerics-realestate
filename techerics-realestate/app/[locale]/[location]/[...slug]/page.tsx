@@ -335,8 +335,6 @@ export default async function DynamicLocationMatrixPage({ params }: Props) {
                 </div>
               ))}
             </div>
-          )}
-        </div>
         </div>
 
         {/* Programmatic SEO Localized FAQs */}
