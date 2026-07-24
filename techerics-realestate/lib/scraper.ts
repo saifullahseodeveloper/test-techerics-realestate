@@ -4,20 +4,24 @@
 // raw property facts, prices, locations, specs, and photos.
 // ============================================================
 
+import { GLOBAL_CITIES, GLOBAL_COUNTRIES } from "./global-locations";
+
 export type ScrapedPropertyRaw = {
   sourceUrl: string;
   rawTitle: string;
   rawDescription: string;
   price?: number;
   currency?: string;
+  countryCode?: string;
+  countryName?: string;
+  cityName?: string;
+  localityName?: string;
+  addressLine?: string;
   propertyType?: string;
   purpose?: "SALE" | "RENT";
   bedrooms?: number;
   bathrooms?: number;
   areaSqft?: number;
-  cityName?: string;
-  localityName?: string;
-  addressLine?: string;
   latitude?: number;
   longitude?: number;
   amenities: string[];
@@ -140,23 +144,22 @@ export async function scrapeSinglePropertyUrl(url: string): Promise<ScrapedPrope
 
   const html = await res.text();
 
-  // Initial extracted data defaults
+  // Initial extracted data
   let rawTitle = extractOgTag(html, "og:title") || extractTagText(html, "title") || "Scraped Property Listing";
   let rawDescription = extractOgTag(html, "og:description") || extractMetaByName(html, "description") || "";
   let price: number | undefined;
-  let currency = "INR";
+  let currency: string | undefined;
   let bedrooms: number | undefined;
   let bathrooms: number | undefined;
   let areaSqft: number | undefined;
-  let cityName = "Mumbai";
-  let localityName = "Bandra West";
-  let addressLine = "";
+  let cityName: string | undefined;
+  let localityName: string | undefined;
+  let addressLine: string | undefined;
   let propertyType = "APARTMENT";
   let purpose: "SALE" | "RENT" = "SALE";
   const photoUrls: string[] = [];
-  const amenities: string[] = [];
 
-  // Parse JSON-LD structured data block
+  // 1) Parse JSON-LD structured data block
   const jsonLdBlocks = html.match(/<script type=["']application\/ld\+json["']>(.*?)<\/script>/gis);
   if (jsonLdBlocks) {
     for (const block of jsonLdBlocks) {
@@ -208,7 +211,46 @@ export async function scrapeSinglePropertyUrl(url: string): Promise<ScrapedPrope
     }
   }
 
-  // Extract images from og:image
+  // 2) Smart Location & City Detection from URL + Title + HTML content
+  const fullTextToScan = `${url} ${rawTitle} ${rawDescription} ${addressLine || ""}`.toLowerCase();
+
+  let detectedCity = cityName;
+  let detectedLocality = localityName;
+  let detectedCountry = "IN";
+
+  // Scan against dataset of global cities
+  for (const cityItem of GLOBAL_CITIES) {
+    if (fullTextToScan.includes(cityItem.name.toLowerCase()) || fullTextToScan.includes(cityItem.slug.toLowerCase())) {
+      detectedCity = cityItem.name;
+      detectedCountry = cityItem.countryCode;
+      if (!currency) {
+        const countryObj = GLOBAL_COUNTRIES.find((c) => c.code === cityItem.countryCode);
+        if (countryObj) currency = countryObj.currency;
+      }
+
+      // Check localities for this city
+      for (const loc of cityItem.popularLocalities) {
+        if (fullTextToScan.includes(loc.toLowerCase())) {
+          detectedLocality = loc;
+          break;
+        }
+      }
+      break;
+    }
+  }
+
+  // Fallback defaults if location scanning did not match a city
+  if (!detectedCity) {
+    detectedCity = "Mumbai";
+  }
+  if (!detectedLocality) {
+    detectedLocality = "Central";
+  }
+  if (!currency) {
+    currency = detectedCountry === "AE" ? "AED" : detectedCountry === "US" ? "USD" : "INR";
+  }
+
+  // 3) Extract images from og:image
   const ogImg = extractOgTag(html, "og:image");
   if (ogImg && !photoUrls.includes(ogImg)) {
     photoUrls.unshift(ogImg);
@@ -266,20 +308,29 @@ export async function scrapeSinglePropertyUrl(url: string): Promise<ScrapedPrope
     photoUrls.push("https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80");
   }
 
+  // Clean raw title from repetitive branding strings
+  const cleanTitle = rawTitle
+    .replace(/\|\s*.*$/i, "")
+    .replace(/-\s*.*$/i, "")
+    .replace(/for sale/gi, "")
+    .replace(/for rent/gi, "")
+    .trim();
+
   return {
     sourceUrl: url,
-    rawTitle: rawTitle.replace(/[\n\r]+/g, " ").trim(),
+    rawTitle: cleanTitle.length > 5 ? cleanTitle : rawTitle,
     rawDescription: rawDescription.replace(/[\n\r]+/g, " ").trim(),
     price: price || 25000000,
     currency,
+    countryCode: detectedCountry,
     propertyType,
     purpose,
     bedrooms: bedrooms || 3,
     bathrooms: bathrooms || 3,
     areaSqft: areaSqft || 2100,
-    cityName,
-    localityName,
-    addressLine: addressLine || `${localityName}, ${cityName}`,
+    cityName: detectedCity,
+    localityName: detectedLocality,
+    addressLine: addressLine || `${detectedLocality}, ${detectedCity}`,
     amenities: ["Swimming Pool", "Gym", "Concierge", "24/7 Security", "Valet Parking"],
     photoUrls: photoUrls.slice(0, 10),
   };

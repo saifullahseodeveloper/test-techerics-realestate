@@ -5,10 +5,21 @@ import { generatePropertySeoContent, generateAltTextBatch } from "@/lib/ai-seo-w
 import { generatePropertySchema, generateBreadcrumbSchema } from "@/lib/seo";
 
 function slugify(title: string, locality: string, city: string, id: string) {
-  const base = `${title}-${locality}-${city}`
+  let base = title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+
+  const locSlug = locality.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const citySlug = city.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+  if (!base.includes(locSlug)) {
+    base = `${base}-${locSlug}`;
+  }
+  if (!base.includes(citySlug)) {
+    base = `${base}-${citySlug}`;
+  }
+
   return `${base}-${id.slice(-6)}`;
 }
 
@@ -41,10 +52,17 @@ export async function POST(req: Request) {
           const raw = await scrapeSinglePropertyUrl(targetUrl);
 
           // 2) Auto-find or create Country, City, Locality in DB
-          let country = await prisma.country.findFirst({ where: { code: "IN" } });
+          const countryCode = raw.countryCode || "IN";
+          let country = await prisma.country.findFirst({ where: { code: countryCode } });
           if (!country) {
             country = await prisma.country.create({
-              data: { code: "IN", slug: "india", name: "India", defaultCurrency: "INR", currencySymbol: "₹" },
+              data: {
+                code: countryCode,
+                slug: countryCode === "AE" ? "uae" : countryCode === "US" ? "usa" : "india",
+                name: countryCode === "AE" ? "United Arab Emirates" : countryCode === "US" ? "United States" : "India",
+                defaultCurrency: raw.currency || "INR",
+                currencySymbol: raw.currency === "AED" ? "AED " : raw.currency === "USD" ? "$" : "₹",
+              },
             });
           }
 
@@ -66,15 +84,15 @@ export async function POST(req: Request) {
           let locality = await prisma.locality.findFirst({
             where: {
               cityId: city.id,
-              slug: (raw.localityName || "bandra-west").toLowerCase().replace(/\s+/g, "-"),
+              slug: (raw.localityName || "central").toLowerCase().replace(/\s+/g, "-"),
             },
           });
 
           if (!locality) {
             locality = await prisma.locality.create({
               data: {
-                name: raw.localityName || "Bandra West",
-                slug: (raw.localityName || "bandra-west").toLowerCase().replace(/\s+/g, "-"),
+                name: raw.localityName || "Central",
+                slug: (raw.localityName || "central").toLowerCase().replace(/\s+/g, "-"),
                 cityId: city.id,
                 latitude: 19.0544,
                 longitude: 72.82,

@@ -265,7 +265,7 @@ export default async function PropertyPage({ params }: Props) {
         {/* About the Project */}
         <section className="mt-10 rounded-3xl border border-slate-800 bg-slate-900/50 p-6 sm:p-8">
           <h2 className="font-serif text-2xl font-bold text-white">About the Project</h2>
-          <p className="mt-3 text-sm leading-relaxed text-slate-300">{desc}</p>
+          <div className="mt-3 text-sm leading-relaxed text-slate-300 whitespace-pre-line">{desc}</div>
         </section>
 
         {/* Price History & Market Appreciation Box */}

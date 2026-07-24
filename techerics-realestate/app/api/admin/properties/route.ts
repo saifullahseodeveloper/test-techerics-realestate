@@ -16,10 +16,21 @@ import { publishPropertyReel, publishPropertyPhoto } from "@/lib/instagram";
 // ============================================================
 
 function slugify(title: string, locality: string, city: string, id: string) {
-  const base = `${title}-${locality}-${city}`
+  let base = title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+
+  const locSlug = locality.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const citySlug = city.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+  if (!base.includes(locSlug)) {
+    base = `${base}-${locSlug}`;
+  }
+  if (!base.includes(citySlug)) {
+    base = `${base}-${citySlug}`;
+  }
+
   return `${base}-${id.slice(-6)}`;
 }
 
