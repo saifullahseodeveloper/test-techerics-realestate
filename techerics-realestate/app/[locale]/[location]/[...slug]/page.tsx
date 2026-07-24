@@ -65,16 +65,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = `${bedText}${typeText} ${intentText} in ${locationName}, ${countryName} (2026 Prices) | Tech Erics`;
   const description = `Browse verified ${bedText.toLowerCase()}${typeText.toLowerCase()} ${intentText} in ${locationName}, ${countryName}. RERA approved masterplans, 360° virtual tours, zero commission.`;
 
+  const canonicalPath = "/" + [locale, location, ...slug].join("/");
+  const ogUrl = "https://techerics.com" + canonicalPath;
+
   return {
     title,
     description,
     alternates: {
-      canonical: `/${locale}/${location}/${slug.join("/")}`,
+      canonical: canonicalPath,
     },
     openGraph: {
       title,
       description,
-      url: `https://techerics.com/${locale}/${location}/${slug.join("/")}`,
+      url: ogUrl,
       siteName: "Tech Erics Global Real Estate",
       images: [
         {
@@ -116,12 +119,48 @@ export default async function DynamicLocationMatrixPage({ params }: Props) {
   // Property detail permalink page
   if (isPropertyDetail) {
     const propTitle = slug[slug.length - 1].replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+    const citySlugPart = cityNameFromSegment(subLocationSegment || locationSegment);
+    const locSlugPart = subLocationSegment ? subLocationSegment.toLowerCase().replace(/\s+/g, "-") : citySlugPart;
+
+    const jsonLdSchema = {
+      "@context": "https://schema.org",
+      "@type": "RealEstateListing",
+      name: propTitle,
+      description: `Luxury property in ${subLocationSegment || locationSegment}, ${locationSegment}. RERA verified.`,
+      url: "https://techerics.com/" + locale + "/property/" + slug[slug.length - 1],
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: subLocationSegment || locationSegment,
+        addressRegion: locationSegment,
+      },
+    };
+
+    const breadcrumbSchema = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: "https://techerics.com/" + locale },
+        { "@type": "ListItem", position: 2, name: locationSegment, item: "https://techerics.com/" + locale + "/" + location },
+        { "@type": "ListItem", position: 3, name: subLocationSegment || locationSegment, item: "https://techerics.com/" + locale + "/" + location + "/" + locSlugPart },
+        { "@type": "ListItem", position: 4, name: propTitle, item: "https://techerics.com/" + locale + "/property/" + slug[slug.length - 1] },
+      ],
+    };
+
     return (
       <main className="min-h-screen bg-slate-950 px-4 py-8 text-slate-100">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        />
+
         <div className="mx-auto max-w-6xl">
           <nav aria-label="breadcrumb" className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
-            <Link href={`/${locale}`} className="hover:text-teal-400">Home</Link> /{" "}
-            <Link href={`/${locale}/${location}`} className="hover:text-teal-400">{locationSegment}</Link> /{" "}
+            <Link href={"/" + locale} className="hover:text-teal-400">Home</Link> /{" "}
+            <Link href={"/" + locale + "/" + location} className="hover:text-teal-400">{locationSegment}</Link> /{" "}
             <span className="text-teal-400">{propTitle}</span>
           </nav>
 
@@ -223,12 +262,15 @@ export default async function DynamicLocationMatrixPage({ params }: Props) {
     take: 12,
   });
 
+  const subSlugPart = subLocationSegment ? subLocationSegment.toLowerCase().replace(/\s+/g, "-") + "/" : "";
+  const intentSlugPart = currentPurpose === "SALE" ? "for-sale" : "for-rent";
+
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-10 text-slate-100">
       <div className="mx-auto max-w-6xl">
         <nav aria-label="breadcrumb" className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
-          <Link href={`/${locale}`} className="hover:text-teal-400">Home</Link> /{" "}
-          <Link href={`/${locale}/${location}`} className="hover:text-teal-400">{locationSegment}</Link> /{" "}
+          <Link href={"/" + locale} className="hover:text-teal-400">Home</Link> /{" "}
+          <Link href={"/" + locale + "/" + location} className="hover:text-teal-400">{locationSegment}</Link> /{" "}
           <span className="text-teal-400">{subLocationSegment || "Market"}</span>
         </nav>
 
@@ -252,15 +294,18 @@ export default async function DynamicLocationMatrixPage({ params }: Props) {
 
           {/* Dedicated Intent Toggle Links with Glassmorphism pills */}
           <div className="mt-6 flex flex-wrap gap-2 text-xs font-semibold">
-            {["Apartments", "Villas", "Townhouses", "Offices", "Commercial Shops"].map((type) => (
-              <Link
-                key={type}
-                href={`/${locale}/${location}/${subLocationSegment ? `${subLocationSegment.toLowerCase().replace(/\s+/g, "-")}/` : ""}${type.toLowerCase()}/${currentPurpose === "SALE" ? "for-sale" : "for-rent"}`}
-                className="glass-pill rounded-xl px-4 py-2 text-slate-300 hover:text-white transition"
-              >
-                {type} {purposeText} in {subLocationSegment || locationSegment}
-              </Link>
-            ))}
+            {["Apartments", "Villas", "Townhouses", "Offices", "Commercial Shops"].map((tName) => {
+              const linkHref = "/" + locale + "/" + location + "/" + subSlugPart + tName.toLowerCase() + "/" + intentSlugPart;
+              return (
+                <Link
+                  key={tName}
+                  href={linkHref}
+                  className="glass-pill rounded-xl px-4 py-2 text-slate-300 hover:text-white transition"
+                >
+                  {tName} {purposeText} in {subLocationSegment || locationSegment}
+                </Link>
+              );
+            })}
           </div>
         </div>
 
@@ -294,7 +339,7 @@ export default async function DynamicLocationMatrixPage({ params }: Props) {
                       <div className="mt-4 flex items-center justify-between">
                         <span className="text-base font-extrabold text-amber-300">{priceVal}</span>
                         <Link
-                          href={`/${locale}/property/${p.slug}`}
+                          href={"/" + locale + "/property/" + p.slug}
                           className="rounded-xl bg-teal-500 px-3.5 py-2 text-xs font-bold text-slate-950 hover:bg-teal-400"
                         >
                           View Property →
@@ -325,7 +370,7 @@ export default async function DynamicLocationMatrixPage({ params }: Props) {
                     <div className="mt-4 flex items-center justify-between">
                       <span className="text-base font-extrabold text-amber-300">{proj.price}</span>
                       <Link
-                        href={`/${locale}/${location}/${proj.id}`}
+                        href={"/" + locale + "/" + location + "/" + proj.id}
                         className="rounded-xl bg-teal-500 px-3.5 py-2 text-xs font-bold text-slate-950 hover:bg-teal-400"
                       >
                         View Property →
@@ -335,6 +380,7 @@ export default async function DynamicLocationMatrixPage({ params }: Props) {
                 </div>
               ))}
             </div>
+          )}
         </div>
 
         {/* Programmatic SEO Localized FAQs */}
@@ -354,4 +400,8 @@ export default async function DynamicLocationMatrixPage({ params }: Props) {
       </div>
     </main>
   );
+}
+
+function cityNameFromSegment(segment: string): string {
+  return segment.toLowerCase().replace(/\s+/g, "-");
 }
