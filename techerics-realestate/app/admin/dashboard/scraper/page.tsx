@@ -4,15 +4,50 @@ import { useState } from "react";
 import Link from "next/link";
 
 export default function BulkSiteScraperPage() {
+  const [masterUrl, setMasterUrl] = useState("");
+  const [isExecutingMaster, setIsExecutingMaster] = useState(false);
+  const [masterResult, setMasterResult] = useState<any>(null);
+
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [isDiscovering, setIsDiscovering] = useState(false);
   const [discoveredUrls, setDiscoveredUrls] = useState<string[]>([]);
   const [selectedUrls, setSelectedUrls] = useState<Set<string>>(new Set());
 
   const [isImporting, setIsImporting] = useState(false);
-  const [importProgress, setImportProgress] = useState({ current: 0, total: 0 });
   const [importedResults, setImportedResults] = useState<{ slug: string; title: string }[]>([]);
   const [message, setMessage] = useState("");
+
+  // Master Autonomous Execution Command
+  async function handleMasterExecute(e: React.FormEvent) {
+    e.preventDefault();
+    if (!masterUrl) return;
+
+    setIsExecutingMaster(true);
+    setMessage("");
+    setMasterResult(null);
+
+    try {
+      const res = await fetch("/api/admin/scraper/master", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetUrl: masterUrl }),
+      });
+
+      const data = await res.json();
+      setIsExecutingMaster(false);
+
+      if (data.success) {
+        setMasterResult(data);
+        setMessage(`Master Command executed successfully! Created ${data.createdPropertiesCount} Master Listings and Merged ${data.mergedDuplicatesCount} Duplicates.`);
+      } else {
+        setMessage(data.error || "Master command execution failed.");
+      }
+    } catch (err) {
+      console.error(err);
+      setIsExecutingMaster(false);
+      setMessage("Master Command execution failed.");
+    }
+  }
 
   // Mode 1: Discover listing URLs from website
   async function handleDiscover(e: React.FormEvent) {
@@ -37,7 +72,7 @@ export default function BulkSiteScraperPage() {
 
       if (data.success && data.urls?.length) {
         setDiscoveredUrls(data.urls);
-        setSelectedUrls(new Set(data.urls)); // Select all by default
+        setSelectedUrls(new Set(data.urls));
         setMessage(`Found ${data.urls.length} property listing URLs on target website!`);
       } else {
         setMessage(data.error || "No listing URLs found on target website.");
@@ -49,7 +84,6 @@ export default function BulkSiteScraperPage() {
     }
   }
 
-  // Toggle URL selection
   function toggleUrl(url: string) {
     const next = new Set(selectedUrls);
     if (next.has(url)) next.delete(url);
@@ -71,7 +105,6 @@ export default function BulkSiteScraperPage() {
     if (!urlsToImport.length) return;
 
     setIsImporting(true);
-    setImportProgress({ current: 0, total: urlsToImport.length });
     setMessage("");
 
     try {
@@ -105,17 +138,17 @@ export default function BulkSiteScraperPage() {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold uppercase tracking-widest text-teal-400">
-                🌐 Automated AI Ingestion Engine
+                ⚡ AI Master Autonomous Real Estate Engine
               </span>
               <span className="rounded-full bg-teal-500/20 px-3 py-0.5 text-[10px] font-extrabold text-teal-300 border border-teal-500/30">
-                WHOLE-SITE BULK SCRAPER & REWRITER
+                14-POINT SPECIFICATION SYSTEM
               </span>
             </div>
             <h1 className="mt-2 font-serif text-3xl font-bold text-white sm:text-4xl">
-              Real Estate Website Scraper
+              AI Autonomous Ingestion Operating System
             </h1>
-            <p className="mt-2 text-xs text-slate-400 max-w-2xl">
-              Paste any real estate portal or sitemap URL. The system automatically discovers all property links, scrapes facts, rewrites titles & descriptions with AI for 100% original content, and auto-publishes to your database!
+            <p className="mt-2 text-xs text-slate-400 max-w-3xl">
+              Crawls target sites, runs AI Duplicate Fingerprinting, performs E-E-A-T SEO rewriting, calculates investment yields, and builds an interconnected 100+ link Spider-Mesh Knowledge Graph!
             </p>
           </div>
         </div>
@@ -127,11 +160,81 @@ export default function BulkSiteScraperPage() {
         )}
       </div>
 
-      {/* Website Link Discovery Box */}
+      {/* AI Master Command Console Box */}
+      <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-teal-500/30">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-2xl">🤖</span>
+          <div>
+            <h2 className="font-serif text-xl font-bold text-white">AI Master Autonomous Command Engine</h2>
+            <p className="text-xs text-slate-400">
+              Single command whole-site ingestion: Crawl, Deduplicate, Valuation Score, E-E-A-T Rewrite, and Knowledge Graph Linking.
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handleMasterExecute} className="mt-4 flex flex-col sm:flex-row gap-3">
+          <input
+            type="url"
+            value={masterUrl}
+            onChange={(e) => setMasterUrl(e.target.value)}
+            required
+            placeholder="Scrape https://example.com and convert it into a production-ready SEO-optimized listing ecosystem"
+            className="flex-1 rounded-xl border border-teal-500/40 bg-slate-900 px-4 py-3 text-xs text-slate-100 placeholder-slate-500 focus:border-teal-400 focus:outline-none"
+          />
+          <button
+            type="submit"
+            disabled={isExecutingMaster}
+            className="rounded-xl bg-gradient-to-r from-teal-400 via-emerald-400 to-amber-400 px-6 py-3 text-xs font-extrabold text-slate-950 shadow-lg shadow-teal-500/20 hover:opacity-90 disabled:opacity-50"
+          >
+            {isExecutingMaster ? "Executing Master Command..." : "⚡ Execute Master Command"}
+          </button>
+        </form>
+      </div>
+
+      {/* Master Autonomous Results Card */}
+      {masterResult && (
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-emerald-500/40">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+            <h3 className="font-serif text-xl font-bold text-white">🎉 Master Autonomous Ingestion Report</h3>
+            <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-bold text-emerald-300 border border-emerald-500/30">
+              Target: {masterResult.targetUrl}
+            </span>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-4 text-center">
+            <div className="glass-card rounded-2xl p-4">
+              <span className="block text-xs uppercase font-bold text-slate-400">Discovered URLs</span>
+              <span className="font-serif text-2xl font-extrabold text-white mt-1 block">{masterResult.totalDiscovered}</span>
+            </div>
+            <div className="glass-card rounded-2xl p-4">
+              <span className="block text-xs uppercase font-bold text-slate-400">Master Properties Created</span>
+              <span className="font-serif text-2xl font-extrabold text-teal-400 mt-1 block">{masterResult.createdPropertiesCount}</span>
+            </div>
+            <div className="glass-card rounded-2xl p-4">
+              <span className="block text-xs uppercase font-bold text-slate-400">Duplicates Merged</span>
+              <span className="font-serif text-2xl font-extrabold text-amber-300 mt-1 block">{masterResult.mergedDuplicatesCount}</span>
+            </div>
+            <div className="glass-card rounded-2xl p-4">
+              <span className="block text-xs uppercase font-bold text-slate-400">Knowledge Graph Nodes</span>
+              <span className="font-serif text-2xl font-extrabold text-emerald-300 mt-1 block">{masterResult.knowledgeGraphNodesCount}</span>
+            </div>
+          </div>
+
+          {/* Audit Logs Terminal */}
+          <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4 font-mono text-xs text-slate-300 max-h-60 overflow-y-auto space-y-1">
+            <span className="text-teal-400 font-bold block mb-2">📋 Execution Audit Terminal:</span>
+            {masterResult.logs.map((log: string, idx: number) => (
+              <div key={idx} className="leading-relaxed">{log}</div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Manual Link Discovery & Batch Selection Box */}
       <div className="glass-panel rounded-3xl p-6 sm:p-8">
-        <h2 className="font-serif text-xl font-bold text-white mb-2">Step 1: Enter Target Website or Sitemap URL</h2>
+        <h2 className="font-serif text-xl font-bold text-white mb-2">Manual Link Discovery & Batch Selection</h2>
         <p className="text-xs text-slate-400 mb-4">
-          Provide a homepage (e.g. <span className="font-mono text-slate-200">https://magicbricks.com</span>), sitemap (<span className="font-mono text-slate-200">/sitemap.xml</span>), or catalog category link.
+          Or paste a URL to manually select which specific listing links to import.
         </p>
 
         <form onSubmit={handleDiscover} className="flex flex-col sm:flex-row gap-3">
@@ -139,16 +242,15 @@ export default function BulkSiteScraperPage() {
             type="url"
             value={websiteUrl}
             onChange={(e) => setWebsiteUrl(e.target.value)}
-            required
             placeholder="https://example-realestate-website.com/properties"
             className="flex-1 rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-xs text-slate-100 placeholder-slate-500 focus:border-teal-400 focus:outline-none"
           />
           <button
             type="submit"
             disabled={isDiscovering}
-            className="rounded-xl bg-gradient-to-r from-teal-400 to-emerald-400 px-6 py-3 text-xs font-bold text-slate-950 shadow-lg shadow-teal-500/20 hover:opacity-90 disabled:opacity-50"
+            className="rounded-xl bg-slate-800 border border-slate-700 px-6 py-3 text-xs font-bold text-slate-200 hover:bg-slate-700 disabled:opacity-50"
           >
-            {isDiscovering ? "Discovering Links..." : "🔍 Discover All Website Listings"}
+            {isDiscovering ? "Discovering Links..." : "🔍 Discover Links"}
           </button>
         </form>
       </div>
@@ -159,9 +261,8 @@ export default function BulkSiteScraperPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 border-b border-slate-800 pb-4">
             <div>
               <h2 className="font-serif text-xl font-bold text-white">
-                Step 2: Select Listings to Scrape & AI Rewrite ({selectedUrls.size} / {discoveredUrls.length})
+                Select Listings to Import ({selectedUrls.size} / {discoveredUrls.length})
               </h2>
-              <p className="text-xs text-slate-400">All selected listings will be scraped, AI rewritten, and imported in bulk.</p>
             </div>
 
             <div className="flex items-center gap-3">
@@ -177,7 +278,7 @@ export default function BulkSiteScraperPage() {
                 disabled={isImporting || selectedUrls.size === 0}
                 className="rounded-xl bg-gradient-to-r from-teal-400 to-emerald-400 px-6 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-teal-500/20 hover:opacity-90 disabled:opacity-50"
               >
-                {isImporting ? "Scraping & AI Rewriting..." : `⚡ 1-Click Bulk Scrape & Publish (${selectedUrls.size})`}
+                {isImporting ? "Scraping & Rewriting..." : `⚡ Import Selected (${selectedUrls.size})`}
               </button>
             </div>
           </div>
@@ -216,7 +317,7 @@ export default function BulkSiteScraperPage() {
       {importedResults.length > 0 && (
         <div className="glass-panel rounded-3xl p-6 sm:p-8">
           <h2 className="font-serif text-xl font-bold text-white mb-4">
-            🎉 Successfully Imported & AI Rewritten Properties ({importedResults.length})
+            🎉 Imported Properties ({importedResults.length})
           </h2>
 
           <div className="space-y-3">

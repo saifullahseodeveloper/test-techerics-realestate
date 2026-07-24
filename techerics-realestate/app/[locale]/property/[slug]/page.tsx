@@ -11,6 +11,7 @@ import Tour360Viewer from "@/components/Tour360Viewer";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 import MapEmbed from "@/components/MapEmbed";
 import EmiCalculator from "@/components/EmiCalculator";
+import SpiderInternalLinks from "@/components/SpiderInternalLinks";
 
 export const revalidate = 60;
 
@@ -350,6 +351,13 @@ export default async function PropertyPage({ params }: Props) {
             </a>
           </div>
         </section>
+
+        {/* AI Spider-Mesh Internal Links & Knowledge Graph */}
+        <SpiderInternalLinks
+          localityName={localityName}
+          cityName={cityName}
+          priceFormatted={priceFormatted}
+        />
       </div>
     </main>
   );
