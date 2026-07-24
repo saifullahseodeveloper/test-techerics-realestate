@@ -2,12 +2,17 @@
 
 import Link from "next/link";
 import { useCountry } from "@/lib/country-context";
+import { getCountryMarket } from "@/lib/country-data";
 import { GLOBAL_CITIES, GLOBAL_COUNTRIES } from "@/lib/global-locations";
 
 export default function ContextualFooter({ currentLocation }: { currentLocation?: string } = {}) {
-  const { market, countryCode } = useCountry();
+  const contextCountry = useCountry();
 
-  // Filter cities specifically for the currently selected country
+  // If currentLocation is provided, use its market config; otherwise fallback to context
+  const market = currentLocation ? getCountryMarket(currentLocation) : contextCountry.market;
+  const countryCode = currentLocation ? market.code : contextCountry.countryCode;
+
+  // Filter cities specifically for the active page country
   const countryCities = GLOBAL_CITIES.filter(
     (c) => c.countryCode.toLowerCase() === countryCode.toLowerCase() || c.countryName.toLowerCase() === market.countryName.toLowerCase()
   );

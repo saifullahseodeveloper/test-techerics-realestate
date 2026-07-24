@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getCountryMarket } from "@/lib/country-data";
 import { prisma } from "@/lib/db";
-import { GLOBAL_CITIES } from "@/lib/global-locations";
+import { GLOBAL_CITIES, GLOBAL_COUNTRIES } from "@/lib/global-locations";
 import PropertyCard from "@/components/PropertyCard";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 import ContextualFooter from "@/components/ContextualFooter";
@@ -101,6 +102,18 @@ export default async function DynamicLocationMatrixPage({ params }: Props) {
   const { locale, location, slug = [] } = await params;
 
   const market = getCountryMarket(location.toUpperCase());
+
+  // Geographic Hierarchy Validation: If requested city belongs to another country, auto-redirect to correct country URL
+  if (slug[0]) {
+    const requestedCitySlug = slug[0].toLowerCase();
+    const cityMatch = GLOBAL_CITIES.find((c) => c.slug === requestedCitySlug);
+    if (cityMatch && cityMatch.countryCode.toLowerCase() !== market.code.toLowerCase()) {
+      const correctCountry = GLOBAL_COUNTRIES.find((c) => c.code.toLowerCase() === cityMatch.countryCode.toLowerCase());
+      if (correctCountry) {
+        redirect("/" + locale + "/" + correctCountry.slug + "/" + slug.join("/"));
+      }
+    }
+  }
   const locationSegment = location.replace(/-/g, " ").toUpperCase();
   const subLocationSegment = slug[0] ? slug[0].replace(/-/g, " ") : null;
 
