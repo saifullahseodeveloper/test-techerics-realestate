@@ -284,6 +284,7 @@ model Property {
   translations  PropertyTranslation[]
   leads         Lead[]
   savedProperties SavedProperty[]
+  audits        AiOptimizationAudit[]
 
   // SEO fields
   metaTitle       String?
@@ -491,3 +492,28 @@ model BlogPostTranslation {
 
   @@unique([postId, locale])
 }
+
+// ---------------- AI SELF-HEALING & APPROVAL WORKFLOW ----------------
+
+enum AuditStatus {
+  PENDING
+  AUTO_APPLIED
+  APPROVED
+  REJECTED
+}
+
+model AiOptimizationAudit {
+  id              String      @id @default(cuid())
+  propertyId      String?
+  property        Property?   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  pageUrl         String
+  type            String      // SEO_TITLE, META_DESC, REWRITE, INTERNAL_LINK, MISSING_SCHEMA, OUTDATED_PRICE
+  originalValue   String?     @db.Text
+  suggestedValue  String      @db.Text
+  confidenceScore Float       @default(85.0) // 0 - 100%
+  status          AuditStatus @default(PENDING)
+  isLocked        Boolean     @default(false) // Field Lock (immunity against future AI overwrites)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
