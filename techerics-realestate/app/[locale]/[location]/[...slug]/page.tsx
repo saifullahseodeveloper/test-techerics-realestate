@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getCountryMarket } from "@/lib/country-data";
+import { prisma } from "@/lib/db";
 import { GLOBAL_CITIES } from "@/lib/global-locations";
 import PropertyCard from "@/components/PropertyCard";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
@@ -209,6 +210,19 @@ export default async function DynamicLocationMatrixPage({ params }: Props) {
     subLocationSegment ? `${subLocationSegment}, ` : ""
   }${locationSegment}`;
 
+  // Strict Country-Scoped Database Properties Query
+  const dbProps = await prisma.property.findMany({
+    where: {
+      country: {
+        slug: {
+          equals: location.toLowerCase(),
+        },
+      },
+    },
+    include: { city: true, locality: true, media: true, listings: true },
+    take: 12,
+  });
+
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-10 text-slate-100">
       <div className="mx-auto max-w-6xl">
@@ -255,35 +269,74 @@ export default async function DynamicLocationMatrixPage({ params }: Props) {
             Available Listings in {subLocationSegment || locationSegment}
           </h2>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {market.sampleProjects.map((proj) => (
-              <div key={proj.id} className="glass-card group overflow-hidden rounded-2xl transition-all duration-300">
-                <div className="relative aspect-[16/10] w-full overflow-hidden">
-                  <img src={proj.image} alt={proj.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-                  <span className={`absolute top-3 left-3 rounded px-2.5 py-1 text-[10px] font-bold text-white ${currentPurpose === "SALE" ? "bg-rose-600" : "bg-teal-600"}`}>
-                    FOR {currentPurpose}
-                  </span>
-                </div>
-                <div className="p-5">
-                  <span className="text-xs text-teal-400 font-semibold">📍 {proj.location}</span>
-                  <h3 className="mt-1 text-base font-bold text-white group-hover:text-teal-300">{proj.title}</h3>
-                  <div className="mt-3 flex items-center justify-between border-t border-b border-slate-800 py-2.5 text-xs text-slate-400">
-                    <span>🛏️ {proj.bhk}</span>
-                    <span>📐 {proj.sqft}</span>
+          {dbProps.length > 0 ? (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {dbProps.map((p) => {
+                const firstPhoto = p.media?.[0]?.url || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80";
+                const priceVal = p.listings?.[0]?.price ? new Intl.NumberFormat("en-US", { style: "currency", currency: p.listings[0].currency || market.currency, maximumFractionDigits: 0 }).format(Number(p.listings[0].price)) : `${market.symbol} 2,500,000`;
+                const pPurpose = p.listings?.[0]?.purpose || "SALE";
+
+                return (
+                  <div key={p.id} className="glass-card group overflow-hidden rounded-2xl transition-all duration-300">
+                    <div className="relative aspect-[16/10] w-full overflow-hidden">
+                      <img src={firstPhoto} alt={p.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                      <span className={`absolute top-3 left-3 rounded px-2.5 py-1 text-[10px] font-bold text-white ${pPurpose === "SALE" ? "bg-rose-600" : "bg-teal-600"}`}>
+                        FOR {pPurpose}
+                      </span>
+                    </div>
+                    <div className="p-5">
+                      <span className="text-xs text-teal-400 font-semibold">📍 {p.locality.name}, {p.city.name}</span>
+                      <h3 className="mt-1 text-base font-bold text-white group-hover:text-teal-300 line-clamp-1">{p.title}</h3>
+                      <div className="mt-3 flex items-center justify-between border-t border-b border-slate-800 py-2.5 text-xs text-slate-400">
+                        <span>🛏️ {p.bedrooms || 3} Beds</span>
+                        <span>📐 {p.areaSqft || 2100} sqft</span>
+                      </div>
+                      <div className="mt-4 flex items-center justify-between">
+                        <span className="text-base font-extrabold text-amber-300">{priceVal}</span>
+                        <Link
+                          href={`/${locale}/property/${p.slug}`}
+                          className="rounded-xl bg-teal-500 px-3.5 py-2 text-xs font-bold text-slate-950 hover:bg-teal-400"
+                        >
+                          View Property →
+                        </Link>
+                      </div>
+                    </div>
                   </div>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-base font-extrabold text-amber-300">{proj.price}</span>
-                    <Link
-                      href={`/${locale}/${location}/${proj.id}`}
-                      className="rounded-xl bg-teal-500 px-3.5 py-2 text-xs font-bold text-slate-950 hover:bg-teal-400"
-                    >
-                      View Property →
-                    </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {market.sampleProjects.map((proj) => (
+                <div key={proj.id} className="glass-card group overflow-hidden rounded-2xl transition-all duration-300">
+                  <div className="relative aspect-[16/10] w-full overflow-hidden">
+                    <img src={proj.image} alt={proj.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                    <span className={`absolute top-3 left-3 rounded px-2.5 py-1 text-[10px] font-bold text-white ${currentPurpose === "SALE" ? "bg-rose-600" : "bg-teal-600"}`}>
+                      FOR {currentPurpose}
+                    </span>
+                  </div>
+                  <div className="p-5">
+                    <span className="text-xs text-teal-400 font-semibold">📍 {proj.location}</span>
+                    <h3 className="mt-1 text-base font-bold text-white group-hover:text-teal-300">{proj.title}</h3>
+                    <div className="mt-3 flex items-center justify-between border-t border-b border-slate-800 py-2.5 text-xs text-slate-400">
+                      <span>🛏️ {proj.bhk}</span>
+                      <span>📐 {proj.sqft}</span>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between">
+                      <span className="text-base font-extrabold text-amber-300">{proj.price}</span>
+                      <Link
+                        href={`/${locale}/${location}/${proj.id}`}
+                        className="rounded-xl bg-teal-500 px-3.5 py-2 text-xs font-bold text-slate-950 hover:bg-teal-400"
+                      >
+                        View Property →
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
+        </div>
         </div>
 
         {/* Programmatic SEO Localized FAQs */}
